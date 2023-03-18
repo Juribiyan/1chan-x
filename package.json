@@ -1,0 +1,22 @@
+{
+  "name": "1chan-X",
+  "version": "1.0.0",
+  "description": "UX extension for 1chan.su and the likes",
+  "scripts": {
+    "build": "babel --presets=@babel/preset-env src --out-dir dist"
+  },
+  "keywords": [
+    "1chan"
+  ],
+  "author": "Snivy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juribiyan/1chan-x.git"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0"
+  }
+}

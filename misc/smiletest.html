@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Smile tester</title>
+	<style>
+		table, th, td {
+		  border: 1px solid;
+		}
+	</style>
+	<script>
+		// Shorthands aka jQuery for the poor
+		const $ = sel => document.querySelector(sel)
+		const $$ = (sel, context=document) => Array.from(context.querySelectorAll(sel))
+		Element.prototype._$ = function(sel) { // barbaric yet effective
+		  return this.querySelector(sel)
+		}
+		Element.prototype._$$ = function(sel) {
+		  return $$(sel, this)
+		}
+		// Insert adjacent HTML and immediately return the inserted element
+		Element.prototype._ins = function(position, html, returnInserted=false) {
+		  this.insertAdjacentHTML(position, html)
+		  if (!returnInserted) return;
+		  position = position.toLowerCase()
+		  if (position == 'afterbegin') 
+		    return this.firstElementChild
+		  else if (position == 'beforeend')
+		    return this.lastElementChild
+		  else if (position == 'beforebegin')
+		    return this.previousElementSibling
+		  else
+		    return this.nextElementSibling
+		}
+
+		EventTarget.prototype.delegateEventListener = function(types, targetSelectors, listener, options) {
+		  if (! (targetSelectors instanceof Array))
+		    targetSelectors = [targetSelectors]
+		  this.addMultiEventListener(types, ev => {
+		    targetSelectors.some(selector => {
+		      if (ev.target.matches(selector)) {
+		        listener.bind(ev.target)(ev)
+		        return true
+		      }
+		    })
+		  }, options)
+		}
+		EventTarget.prototype.addMultiEventListener = function(types, listener, options) {
+		  if (! (types instanceof Array))
+		    types = types.split(' ')
+		  types.forEach(type => {
+		    this.addEventListener(type, ev => {
+		      listener.bind(ev.target)(ev)
+		    }, options)
+		  })
+		}
+
+		;[Element.prototype, Text.prototype].forEach(e => {
+		  e.matches || (e.matches=e.matchesSelector || function(selector) {
+		    var matches = document.querySelectorAll(selector)
+		    return Array.prototype.some.call(matches, e => {
+		       return e === this
+		    })
+		  })
+		  e.findParent = function(selector) {
+		    let node = this
+		    while(node && !node.matches(selector)) {
+		      node = node.parentNode
+		      if (! node.matches) return null;
+		    }
+		    return node
+		  }
+		})
+	</script>
+</head>
+<body>
+	<input type="text" id="smile">
+	<table><tbody></tbody></table>
+	<script>
+		const sites = '1chan.su 1chan.ca 1chan.life 1chan.top'.split(' ')
+		, extensions = 'png gif jpg jpeg webp'.split(' ')
+		, table = document.querySelector('tbody')
+		, thead = table._ins('afterbegin', `<tr><th>Extension</th></tr>`, true)
+		sites.forEach(site => {
+			thead._ins('beforeend', `<th>${site}</th>`)
+		})
+		extensions.forEach(ext => {
+			let tr = table._ins('beforeend', `<tr id=${ext}><th>${ext}</th></tr>`, true)
+			sites.forEach(site => {
+				tr._ins('beforeend', `<td class="${site.split('.')[1]}"></td>`)
+			})
+		})
+		$('#smile').addEventListener('input', function() {
+			let code = this.value
+			extensions.forEach(ext => {
+				sites.forEach(site => {
+					$(`#${ext} .${site.split('.')[1]}`).innerHTML = `<img src="https://${site}/img/${code}.${ext}">`
+				})
+			})
+		})
+	</script>
+</body>
+</html>
