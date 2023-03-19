@@ -797,7 +797,7 @@ const formAugmentation = {
   },
   known_smileys: {
     gif: ["coolface", "desu", "nyan", "sobak", "trollface", "slon", "ssaksa", "sraksa", "sosak", "makak", "pauk", "popka", "popka2", "cheez", "weed"],
-    png: ["awesome", "ffuu", "okay", "rage", "deb", "oru", "doge", "sheez", "poo", "hero", "yajka", "joseph", "ussr", "kpss", "yes"],
+    png: ["awesome", "ffuu", "okay", "rage", "deb", "oru", "doge", "sheez", "poo", "hero", "yajka", "joseph", "ussr", "kpss", "yes", "you"],
     jpg: ["cuni"]
   },
   smile_map: {"poo_target": "png"},
