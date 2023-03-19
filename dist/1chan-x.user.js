@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.1
+// @version      1.0.2
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -1943,7 +1943,7 @@ function setupPanels() {
           document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssURL, "\">")); // temp
 
           // Add viewport
-          document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no\">");
+          document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1\">");
           siteSpecific.init();
           document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18() {
             var state, val;

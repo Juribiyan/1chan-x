@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.1
+// @version      1.0.2
 // @description  UX extension for 1chan.su and the likes
-// @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
+// @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
 // @author       Snivy
 // @match        https://1chan.su/*
@@ -1547,7 +1547,7 @@ function setupPanels() {
 
   // Add viewport
   document.head.insertAdjacentHTML('afterbegin',
-    `<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no">`)
+    `<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">`)
 
   siteSpecific.init()
 
