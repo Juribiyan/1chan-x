@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.0
+// @version      1.0.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -36,6 +36,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        GM.deleteValue
+// @run-at       document-start
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
 
@@ -192,34 +193,34 @@ function GM_getJSON(_x2) {
   return _GM_getJSON.apply(this, arguments);
 } // ======================================== Site settings =========================================
 function _GM_getJSON() {
-  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee19(key) {
+  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20(key) {
     var v, data;
-    return _regeneratorRuntime().wrap(function _callee19$(_context19) {
-      while (1) switch (_context19.prev = _context19.next) {
+    return _regeneratorRuntime().wrap(function _callee20$(_context20) {
+      while (1) switch (_context20.prev = _context20.next) {
         case 0:
-          _context19.next = 2;
+          _context20.next = 2;
           return GM.getValue(key);
         case 2:
-          v = _context19.sent;
+          v = _context20.sent;
           if (v) {
-            _context19.next = 5;
+            _context20.next = 5;
             break;
           }
-          return _context19.abrupt("return", null);
+          return _context20.abrupt("return", null);
         case 5:
-          _context19.prev = 5;
+          _context20.prev = 5;
           data = JSON.parse(v);
-          return _context19.abrupt("return", data);
+          return _context20.abrupt("return", data);
         case 10:
-          _context19.prev = 10;
-          _context19.t0 = _context19["catch"](5);
+          _context20.prev = 10;
+          _context20.t0 = _context20["catch"](5);
           GM.deleteValue(key);
           console.warn("Deleted \"".concat(key, "\" from GM storage due to wrong format"));
         case 14:
         case "end":
-          return _context19.stop();
+          return _context20.stop();
       }
-    }, _callee19, null, [[5, 10]]);
+    }, _callee20, null, [[5, 10]]);
   }));
   return _GM_getJSON.apply(this, arguments);
 }
@@ -941,7 +942,7 @@ var formAugmentation = {
   }(),
   known_smileys: {
     gif: ["coolface", "desu", "nyan", "sobak", "trollface", "slon", "ssaksa", "sraksa", "sosak", "makak", "pauk", "popka", "popka2", "cheez", "weed"],
-    png: ["awesome", "ffuu", "okay", "rage", "deb", "oru", "doge", "sheez", "poo", "hero", "yajka", "joseph", "ussr", "kpss", "yes"],
+    png: ["awesome", "ffuu", "okay", "rage", "deb", "oru", "doge", "sheez", "poo", "hero", "yajka", "joseph", "ussr", "kpss", "yes", "you"],
     jpg: ["cuni"]
   },
   smile_map: {
@@ -1932,10 +1933,10 @@ function setupPanels() {
 // ============================================= Main =============================================
 
 (function () {
-  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18() {
-    var cssURL, state, val;
-    return _regeneratorRuntime().wrap(function _callee18$(_context18) {
-      while (1) switch (_context18.prev = _context18.next) {
+  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee19() {
+    var cssURL;
+    return _regeneratorRuntime().wrap(function _callee19$(_context19) {
+      while (1) switch (_context19.prev = _context19.next) {
         case 0:
           // Add CSS
           cssURL = "https://juribiyan.github.io/1chan-x/css/1chan-x.css";
@@ -1944,34 +1945,45 @@ function setupPanels() {
           // Add viewport
           document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no\">");
           siteSpecific.init();
-          settings.init();
-          _context18.next = 7;
-          return hiddenItems.init();
-        case 7:
-          state = determineState();
-          if (state) {
-            app.state = state;
-            $('.l-wrap').classList.add("x1-state-".concat(state));
-          }
-          if (!(stateHandlers !== null && stateHandlers !== void 0 && stateHandlers[state])) {
-            _context18.next = 12;
-            break;
-          }
-          _context18.next = 12;
-          return stateHandlers[state]();
-        case 12:
-          setupPanels();
+          document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18() {
+            var state, val;
+            return _regeneratorRuntime().wrap(function _callee18$(_context18) {
+              while (1) switch (_context18.prev = _context18.next) {
+                case 0:
+                  settings.init();
+                  _context18.next = 3;
+                  return hiddenItems.init();
+                case 3:
+                  state = determineState();
+                  if (state) {
+                    app.state = state;
+                    $('.l-wrap').classList.add("x1-state-".concat(state));
+                  }
+                  if (!(stateHandlers !== null && stateHandlers !== void 0 && stateHandlers[state])) {
+                    _context18.next = 8;
+                    break;
+                  }
+                  _context18.next = 8;
+                  return stateHandlers[state]();
+                case 8:
+                  setupPanels();
 
-          // Easter egg
-          val = $('a[href^="https://validator.w3.org"]');
-          if (val) {
-            val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
-          }
-        case 15:
+                  // Easter egg
+                  val = $('a[href^="https://validator.w3.org"]');
+                  if (val) {
+                    val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
+                  }
+                case 11:
+                case "end":
+                  return _context18.stop();
+              }
+            }, _callee18);
+          })));
+        case 5:
         case "end":
-          return _context18.stop();
+          return _context19.stop();
       }
-    }, _callee18);
+    }, _callee19);
   }));
   function main() {
     return _main.apply(this, arguments);
