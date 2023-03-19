@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.0
+// @version      1.0.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -18,6 +18,7 @@
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        GM.deleteValue
+// @run-at       document-start
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
 
@@ -1550,23 +1551,25 @@ function setupPanels() {
 
   siteSpecific.init()
 
-  settings.init()
-  await hiddenItems.init()
+  document.addEventListener('DOMContentLoaded', async () => {
+    settings.init()
+    await hiddenItems.init()
 
-  let state = determineState()
-  if (state) {
-    app.state = state
-    $('.l-wrap').classList.add(`x1-state-${state}`)
-  }
-  if (stateHandlers?.[state]) {
-    await stateHandlers[state]()
-  }
+    let state = determineState()
+    if (state) {
+      app.state = state
+      $('.l-wrap').classList.add(`x1-state-${state}`)
+    }
+    if (stateHandlers?.[state]) {
+      await stateHandlers[state]()
+    }
 
-  setupPanels()
+    setupPanels()
 
-  // Easter egg
-  let val = $('a[href^="https://validator.w3.org"]')
-  if (val) {
-    val._ins('beforeend', `<img class="smiley" src="/img/makak.gif">`)
-  }
+    // Easter egg
+    let val = $('a[href^="https://validator.w3.org"]')
+    if (val) {
+      val._ins('beforeend', `<img class="smiley" src="/img/makak.gif">`)
+    }
+  })
 })() // Always last
