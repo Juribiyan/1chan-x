@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.2
+// @version      1.0.3
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1044,7 +1044,7 @@ const formAugmentation = {
     return this.imageSnippets.find(img => img.service == svc && img.code == code)
   },
   deleteImageSnippet: function(svc, code, imgLink) {
-    this.imageSnippets = this.imageSnippets.filter(img => img.service != svc && img.code != code)
+    this.imageSnippets = this.imageSnippets.filter(img => img.service != svc || img.code != code)
     if (!imgLink) {
       imgLink = $(`.x1-img-snippet[title="${this.wrapImgCode(svc, code)}"]`)
     }
@@ -1543,7 +1543,7 @@ function setupPanels() {
 (async function main() {
   // Add CSS
   let cssURL = `https://juribiyan.github.io/1chan-x/css/1chan-x.css`
-  document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssURL}">`) // temp
+  document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssURL}">`)
 
   // Add viewport
   document.head.insertAdjacentHTML('afterbegin',

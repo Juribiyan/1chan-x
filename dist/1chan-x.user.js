@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.2
+// @version      1.0.3
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -1320,7 +1320,7 @@ var formAugmentation = {
   deleteImageSnippet: function deleteImageSnippet(svc, code, imgLink) {
     var _imgLink;
     this.imageSnippets = this.imageSnippets.filter(function (img) {
-      return img.service != svc && img.code != code;
+      return img.service != svc || img.code != code;
     });
     if (!imgLink) {
       imgLink = $(".x1-img-snippet[title=\"".concat(this.wrapImgCode(svc, code), "\"]"));
@@ -1940,7 +1940,7 @@ function setupPanels() {
         case 0:
           // Add CSS
           cssURL = "https://juribiyan.github.io/1chan-x/css/1chan-x.css";
-          document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssURL, "\">")); // temp
+          document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssURL, "\">"));
 
           // Add viewport
           document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1\">");
