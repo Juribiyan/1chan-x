@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.3
+// @version      1.0.4
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -10,6 +10,7 @@
 // @match        https://1chan.ca/*
 // @match        https://1chan.life/*
 // @match        https://1chan.top/*
+// @match        https://1chan.plus/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -212,6 +213,20 @@ const siteSpecific = {
       }
     },
     _1chan_life: {
+      imgSvc: {supported: ['imgur', 'catbox']},
+      css: `
+        .b-blog-panel_b-all span::before {
+          content: '';
+          height: 16px;
+          width: 16px;
+          display: inline-block;
+          vertical-align: middle;
+          margin-right: 6px;
+          background-image: url(/ico/favorites-false.png);
+        }
+      `
+    },
+    _1chan_plus: {
       imgSvc: {supported: ['imgur', 'catbox']},
       css: `
         .b-blog-panel_b-all span::before {

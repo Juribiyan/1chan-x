@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.3
+// @version      1.0.4
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -28,6 +28,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // @match        https://1chan.ca/*
 // @match        https://1chan.life/*
 // @match        https://1chan.top/*
+// @match        https://1chan.plus/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -249,6 +250,12 @@ var siteSpecific = {
       }
     },
     _1chan_life: {
+      imgSvc: {
+        supported: ['imgur', 'catbox']
+      },
+      css: "\n        .b-blog-panel_b-all span::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n      "
+    },
+    _1chan_plus: {
       imgSvc: {
         supported: ['imgur', 'catbox']
       },
