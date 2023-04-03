@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.4
+// @version      1.1.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -148,6 +148,11 @@ function tryDecodeURI(uri) {
   }
 }
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase()
+    + str.slice(1)
+}
+
 
 // =============================== Greasemonkey utils and polyfills ===============================
 // Greasemonkey switched to a fully async API since v.4, yet older versions must be supported
@@ -204,7 +209,8 @@ const siteSpecific = {
         .l-content-wrap {
           border-radius: 23px 23px 8px 8px;
         }
-      `
+      `,
+      features: ['voice']
     },
     _1chan_ca: {
       imgSvc: {
@@ -767,7 +773,7 @@ const formAugmentation = {
     , supportedPanes = {
       'smileys': 'Смайлики',
       'snippets': 'Сниппеты',
-      'images': (['newsentry', 'form'].includes(state)) && 'Картинки'
+      'images': (['newsentry', 'form'].includes(state)) && 'Картинки',
     }
     , btns = '', panes = ''
     for (let p in supportedPanes) {
@@ -885,6 +891,9 @@ const formAugmentation = {
         <button class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Построчное цитирование" data-start="&gt; " style="color:#789922">&gt; </button>
       </div>
       <button class="x1-btn x1-insert-url" title="Вставить ссылку"><div class="x1-url-icon"></div></button>
+      ${siteSpecific.current?.features?.includes('voice') ? 
+        `<button class="x1-btn x1-select-voice" title="Text-to-speech">TTS</button>`
+      :''}
     </div>`, true)
     markPan._$$('.x1-bb-code').forEach(bb => {
       bb.addEventListener('click', ev => {
@@ -910,7 +919,63 @@ const formAugmentation = {
         end: `":${url} `
       })
     })
+
+    let ttsBtn = markPan._$('.x1-select-voice')
+    ttsBtn?.addEventListener('click', ev => {
+      ev.preventDefault()
+      ttsBtn.remove()
+      markPan._ins('beforeend', `<br><div class="x1-tts">
+        <select id="x1-tts">
+        ${this.voices.map(v =>
+          `<option value="${v.default ? '' : v.name}">${capitalize(v.name)}</option>
+          ${v.emotions ? v.emotions.map(e => 
+            `<option value="${v.name}&emotion=${e}">${capitalize(v.name)} (${e})</option>`
+          ).join('') :''}`
+        ).join('')}
+        </select>
+        <button class="x1-btn x1-tts-insert">Вставить</button>
+      </div>`)
+      markPan._$('.x1-tts-insert').addEventListener('click', ev => {
+        ev.preventDefault()
+        let speaker = markPan._$('#x1-tts').value
+        if (speaker != '') {
+          speaker = '&speaker='+speaker
+        }
+        this.insertText({
+          start: `#%`,
+          end: `${speaker}%#`
+        })
+      })
+    })
   },
+  voices: [
+    {
+      name: 'alena',
+      gender: 'f',
+      emotions: ['good'],
+      default: true
+    },
+    {
+      name: 'ermil',
+      gender: 'm',
+      emotions: ['good']
+    },
+    {
+      name: 'jane',
+      gender: 'f',
+      emotions: ['good', 'evil']
+    },
+    {
+      name: 'omazh',
+      gender: 'f',
+      emotions: ['evil']
+    },
+    {
+      name: 'zahar',
+      gender: 'm',
+      emotions: ['good']
+    }
+  ],
   defaultImageServices: {
     imgur: {
       analyze: async (txt) => new Promise((resolve, reject) => {
@@ -1186,7 +1251,8 @@ const formAugmentation = {
         this.saveTxtSnippets()
       }
     }
-  }
+  },
+
 }
 
 const hiddenItems = {

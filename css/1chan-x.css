@@ -1218,3 +1218,18 @@
 .b-live-panel ul li.b-live-panel_b-link input {
     width: calc(100% - 36px);
 }
+
+.x1-tts {
+    text-align: center;
+    margin-bottom: 3px;
+    display: flex;
+    justify-content: center;
+}
+#x1-tts {
+    border: 1px solid rgb(0 0 0 / 0.2);
+    border-radius: 3px;
+    margin-right: 5px;
+}
+.x1-select:hover {
+    border-color: rgb(0 0 0 / .4);
+}

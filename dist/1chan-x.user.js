@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.0.4
+// @version      1.1.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -155,6 +155,9 @@ function tryDecodeURI(uri) {
     return false;
   }
 }
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 // =============================== Greasemonkey utils and polyfills ===============================
 // Greasemonkey switched to a fully async API since v.4, yet older versions must be supported
@@ -239,7 +242,8 @@ var siteSpecific = {
       imgSvc: {
         supported: ['imgur', 'catbox', 'generic']
       },
-      css: "\n        .l-content-wrap {\n          border-radius: 23px 23px 8px 8px;\n        }\n      "
+      css: "\n        .l-content-wrap {\n          border-radius: 23px 23px 8px 8px;\n        }\n      ",
+      features: ['voice']
     },
     _1chan_ca: {
       imgSvc: {
@@ -1018,8 +1022,10 @@ var formAugmentation = {
     this.area.focus();
   },
   setupMarkupPanel: function setupMarkupPanel() {
-    var _this13 = this;
-    var markPan = this.area._ins('beforebegin', "<div class=\"x1-markup-panel\">\n      <button class=\"x1-btn x1-add-text-snippet\" title=\"\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u043A\u0430\u043A \u0437\u0430\u0433\u043E\u0442\u043E\u0432\u043A\u0443\" style=\"float:right\">+ \u0421\u043D\u0438\u043F\u043F\u0435\u0442</button>\n      <div class=\"x1-btn-group x1-inline-btn-group\">\n        <button class=\"x1-btn x1-bb-code\" title=\"\u0416\u0438\u0440\u043D\u044B\u0439\" data-start=\"**\" data-end=\"**\"><b>\u0416</b></button>\n        <button class=\"x1-btn x1-bb-code\" title=\"\u041A\u0443\u0440\u0441\u0438\u0432\" data-start=\"*\" data-end=\"*\"><i>\u041A</i></button>\n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0417\u0430\u0447\u0435\u0440\u043A\u043D\u0443\u0442\u043E\" data-start=\"--\" data-end=\"--\"><s>Z</s></button>\n        <button class=\"x1-btn x1-bb-code\" title=\"\u0421\u043F\u043E\u0439\u043B\u0435\u0440\" data-start=\"%%\" data-end=\"%%\"><span class=\"b-spoiler-text\">%</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"=== \" data-end=\" ===\"><span style=\"transform: scale(1.25); display: block\">H2</span></button>\n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0434\u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"## \" data-end=\" ##\">H3</button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\"> \n        <button class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-force-inline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439\" data-start=\"&#96;\" data-end=\"&#96;\">();</button>\n        <button class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-outer-newline x1-bb-inner-newline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439 \u0431\u043B\u043E\u043A\" data-start=\"/---\" data-end=\"&#92;---\"><span>{</span><span>}</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0426\u0438\u0442\u0430\u0442\u0430\" data-start=\"&gt;&gt;\" data-end=\"&lt;&lt;\" style=\"color:#789922\">\xAB\xBB</button>\n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0441\u0442\u0440\u043E\u0447\u043D\u043E\u0435 \u0446\u0438\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435\" data-start=\"&gt; \" style=\"color:#789922\">&gt; </button>\n      </div>\n      <button class=\"x1-btn x1-insert-url\" title=\"\u0412\u0441\u0442\u0430\u0432\u0438\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443\"><div class=\"x1-url-icon\"></div></button>\n    </div>", true);
+    var _siteSpecific$current,
+      _siteSpecific$current2,
+      _this13 = this;
+    var markPan = this.area._ins('beforebegin', "<div class=\"x1-markup-panel\">\n      <button class=\"x1-btn x1-add-text-snippet\" title=\"\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u043A\u0430\u043A \u0437\u0430\u0433\u043E\u0442\u043E\u0432\u043A\u0443\" style=\"float:right\">+ \u0421\u043D\u0438\u043F\u043F\u0435\u0442</button>\n      <div class=\"x1-btn-group x1-inline-btn-group\">\n        <button class=\"x1-btn x1-bb-code\" title=\"\u0416\u0438\u0440\u043D\u044B\u0439\" data-start=\"**\" data-end=\"**\"><b>\u0416</b></button>\n        <button class=\"x1-btn x1-bb-code\" title=\"\u041A\u0443\u0440\u0441\u0438\u0432\" data-start=\"*\" data-end=\"*\"><i>\u041A</i></button>\n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0417\u0430\u0447\u0435\u0440\u043A\u043D\u0443\u0442\u043E\" data-start=\"--\" data-end=\"--\"><s>Z</s></button>\n        <button class=\"x1-btn x1-bb-code\" title=\"\u0421\u043F\u043E\u0439\u043B\u0435\u0440\" data-start=\"%%\" data-end=\"%%\"><span class=\"b-spoiler-text\">%</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"=== \" data-end=\" ===\"><span style=\"transform: scale(1.25); display: block\">H2</span></button>\n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0434\u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"## \" data-end=\" ##\">H3</button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\"> \n        <button class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-force-inline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439\" data-start=\"&#96;\" data-end=\"&#96;\">();</button>\n        <button class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-outer-newline x1-bb-inner-newline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439 \u0431\u043B\u043E\u043A\" data-start=\"/---\" data-end=\"&#92;---\"><span>{</span><span>}</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0426\u0438\u0442\u0430\u0442\u0430\" data-start=\"&gt;&gt;\" data-end=\"&lt;&lt;\" style=\"color:#789922\">\xAB\xBB</button>\n        <button class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0441\u0442\u0440\u043E\u0447\u043D\u043E\u0435 \u0446\u0438\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435\" data-start=\"&gt; \" style=\"color:#789922\">&gt; </button>\n      </div>\n      <button class=\"x1-btn x1-insert-url\" title=\"\u0412\u0441\u0442\u0430\u0432\u0438\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443\"><div class=\"x1-url-icon\"></div></button>\n      ".concat((_siteSpecific$current = siteSpecific.current) !== null && _siteSpecific$current !== void 0 && (_siteSpecific$current2 = _siteSpecific$current.features) !== null && _siteSpecific$current2 !== void 0 && _siteSpecific$current2.includes('voice') ? "<button class=\"x1-btn x1-select-voice\" title=\"Text-to-speech\">TTS</button>" : '', "\n    </div>"), true);
     markPan._$$('.x1-bb-code').forEach(function (bb) {
       bb.addEventListener('click', function (ev) {
         ev.preventDefault();
@@ -1044,7 +1050,50 @@ var formAugmentation = {
         end: "\":".concat(url, " ")
       });
     });
+    var ttsBtn = markPan._$('.x1-select-voice');
+    ttsBtn === null || ttsBtn === void 0 ? void 0 : ttsBtn.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ttsBtn.remove();
+      markPan._ins('beforeend', "<br><div class=\"x1-tts\">\n        <select id=\"x1-tts\">\n        ".concat(_this13.voices.map(function (v) {
+        return "<option value=\"".concat(v["default"] ? '' : v.name, "\">").concat(capitalize(v.name), "</option>\n          ").concat(v.emotions ? v.emotions.map(function (e) {
+          return "<option value=\"".concat(v.name, "&emotion=").concat(e, "\">").concat(capitalize(v.name), " (").concat(e, ")</option>");
+        }).join('') : '');
+      }).join(''), "\n        </select>\n        <button class=\"x1-btn x1-tts-insert\">\u0412\u0441\u0442\u0430\u0432\u0438\u0442\u044C</button>\n      </div>"));
+      markPan._$('.x1-tts-insert').addEventListener('click', function (ev) {
+        ev.preventDefault();
+        var speaker = markPan._$('#x1-tts').value;
+        if (speaker != '') {
+          speaker = '&speaker=' + speaker;
+        }
+        _this13.insertText({
+          start: "#%",
+          end: "".concat(speaker, "%#")
+        });
+      });
+    });
   },
+  voices: [{
+    name: 'alena',
+    gender: 'f',
+    emotions: ['good'],
+    "default": true
+  }, {
+    name: 'ermil',
+    gender: 'm',
+    emotions: ['good']
+  }, {
+    name: 'jane',
+    gender: 'f',
+    emotions: ['good', 'evil']
+  }, {
+    name: 'omazh',
+    gender: 'f',
+    emotions: ['evil']
+  }, {
+    name: 'zahar',
+    gender: 'm',
+    emotions: ['good']
+  }],
   defaultImageServices: {
     imgur: {
       analyze: function () {
@@ -1219,8 +1268,8 @@ var formAugmentation = {
           case 0:
             // Filter and modify image services for the specific site, generate reverse expressions
             siteSpecific.current.imgSvc.supported.forEach(function (svc) {
-              var _siteSpecific$current;
-              var service = Object.assign(_this15.defaultImageServices[svc], ((_siteSpecific$current = siteSpecific.current.imgSvc) === null || _siteSpecific$current === void 0 ? void 0 : _siteSpecific$current[svc]) || {});
+              var _siteSpecific$current3;
+              var service = Object.assign(_this15.defaultImageServices[svc], ((_siteSpecific$current3 = siteSpecific.current.imgSvc) === null || _siteSpecific$current3 === void 0 ? void 0 : _siteSpecific$current3[svc]) || {});
               // Named image service expressions
               if (service.key !== false) {
                 service.reverseExp = new RegExp("^\\[".concat(service.key, "\\:([^\\s\\/\\:]+)\\:"), 'i');
