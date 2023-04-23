@@ -163,7 +163,8 @@
     .b-chat,
     .b-blog-form,
     .b-static,
-    .b-board-form {
+    .b-board-form,
+    .b-chat-rooms {
         width: auto;
     }
     .l-wrap.x1-state-news .l-content-wrap,
@@ -199,8 +200,6 @@
         margin-bottom: 0;
         display: inline-block;
         width: 100%;
-/*         margin-top: -8px!important; */
-/*         margin-bottom: -6px!important; */
     }
     .b-comments-load span {
         border-radius: 10px;
@@ -409,6 +408,9 @@
     }
     .l-static-wrap {
         margin: 50px 30px 0;
+    }
+    .b-chat-rooms {
+        margin: 0 8px;
     }
 }
 
@@ -1238,4 +1240,5 @@
 .b-blog-panel ul li a,
 .b-chat-panel ul li a {
     display: block;
+    width: 100%;
 }
