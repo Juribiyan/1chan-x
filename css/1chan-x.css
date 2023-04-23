@@ -164,7 +164,8 @@
     .b-blog-form,
     .b-static,
     .b-board-form,
-    .b-chat-rooms {
+    .b-chat-rooms,
+    .b-search-statistics {
         width: auto;
     }
     .l-wrap.x1-state-news .l-content-wrap,
@@ -411,6 +412,9 @@
     }
     .b-chat-rooms {
         margin: 0 8px;
+    }
+    .b-search-statistics {
+        margin: 15px 6px 8px;
     }
 }
 
@@ -1241,4 +1245,7 @@
 .b-chat-panel ul li a {
     display: block;
     width: 100%;
+}
+.b-blog-entry_b-header h1 {
+    font-size: inherit;
 }
