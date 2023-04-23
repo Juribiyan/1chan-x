@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.1.1
+// @version      1.1.2
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -1985,6 +1985,26 @@ function setupPanels() {
     p._ins('afterbegin', "<div class=\"x1-panel-toggle x1-panel-toggle-inpanel\"></div>", true).addEventListener('click', hide);
   });
 }
+function fixMenuForTouch() {
+  var _ref11;
+  var ul = (_ref11 = $('.b-blog-panel') || $('.b-chat-panel')) === null || _ref11 === void 0 ? void 0 : _ref11._$('ul');
+  if (ul && ul._$('li img + a')) {
+    ul._$$('li').forEach(function (li) {
+      var _icon, _icon$textContent;
+      var a = li._$('a'),
+        text = a.textContent,
+        icon = a.previousSibling;
+      if ((_icon = icon) !== null && _icon !== void 0 && (_icon$textContent = _icon.textContent) !== null && _icon$textContent !== void 0 && _icon$textContent.match(/^\s+$/))
+        // First result will be either an emoji or an empty space
+        icon = icon.previousSibling; // This time it will be image
+      if (icon) {
+        a.innerHTML = '';
+        a.appendChild(icon);
+        a._ins('beforeEnd', "<span>".concat(text, "</span>"));
+      }
+    });
+  }
+}
 
 // ============================================= Main =============================================
 
@@ -2023,13 +2043,14 @@ function setupPanels() {
                   return stateHandlers[state]();
                 case 8:
                   setupPanels();
+                  fixMenuForTouch();
 
                   // Easter egg
                   val = $('a[href^="https://validator.w3.org"]');
                   if (val) {
                     val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
                   }
-                case 11:
+                case 12:
                 case "end":
                   return _context18.stop();
               }

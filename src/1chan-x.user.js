@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.1.1
+// @version      1.1.2
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1618,6 +1618,24 @@ function setupPanels() {
   })
 }
 
+function fixMenuForTouch() {
+  let ul = ($('.b-blog-panel') || $('.b-chat-panel'))?._$('ul')
+  if (ul && ul._$('li img + a')) {
+    ul._$$('li').forEach(li => {
+      let a = li._$('a')
+      , text = a.textContent
+      , icon = a.previousSibling
+      if (icon?.textContent?.match(/^\s+$/)) // First result will be either an emoji or an empty space
+        icon = icon.previousSibling // This time it will be image
+      if (icon) {
+        a.innerHTML = ''
+        a.appendChild(icon)
+        a._ins('beforeEnd', `<span>${text}</span>`)
+      }
+    })
+  }
+}
+
 
 // ============================================= Main =============================================
 
@@ -1646,6 +1664,8 @@ function setupPanels() {
     }
 
     setupPanels()
+
+    fixMenuForTouch()
 
     // Easter egg
     let val = $('a[href^="https://validator.w3.org"]')
