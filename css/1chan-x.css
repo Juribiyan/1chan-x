@@ -1249,3 +1249,7 @@
 .b-blog-entry_b-header h1 {
     font-size: inherit;
 }
+.b-blog-entry_b-body.g-clearfix {
+    overflow: visible;
+    word-break: break-word;
+}
