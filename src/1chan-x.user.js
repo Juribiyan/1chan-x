@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.1.2
+// @version      1.2.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -352,7 +352,9 @@ const comments = {
         new MutationObserver(this.observe.bind(this))
         .observe(placeholder, {childList: true})
       })
+    }
 
+    if (['newsentry', 'thread', 'board', 'news'].includes(state)) {
       this.setupPreviews()
     }
 
@@ -656,20 +658,31 @@ const comments = {
     let boardPrefix = (app.state == 'thread' || app.state == 'board')
       ? (document.location.pathname.split('/')?.[1] + '_')
       : ''
-    document.body.delegateEventListener(['mouseenter', 'mouseleave'], ['.x1-comment-preview .js-cross-link', '.x1-cross-link', '.x1-comment-preview'], function(ev) {
+    , self = this
+    document.body.delegateEventListener(['mouseenter', 'mouseleave'], ['.x1-comment-preview .js-cross-link', '.x1-cross-link', '.x1-comment-preview', '.b-blog-entry_b-info_b-link'], async function(ev) {
       let isLink = !this.classList.contains('x1-comment-preview')
       , link = isLink ? this : this?._boundLink
       , preview = isLink ? this?._boundPreview : this
+      , viewLastComment = false
+      if (this.classList.contains('b-blog-entry_b-info_b-link')) {
+        if (app.state != 'news') return false;
+        viewLastComment = this._$('a')?.href?.match(/res\/([\d]+)/)?.[1]
+        if (!viewLastComment) return false;
+      }
       if (ev.type == 'mouseenter') {
         if (!preview) { // Create preview
           let n = this.innerText.slice(2)
-          , refCom = $(`#comment_${boardPrefix}${n}`)
+          , refCom = viewLastComment
+            ? await self.getLastComment(viewLastComment)
+            : $(`#comment_${boardPrefix}${n}`)
           if (refCom) {
             let top = link.offsetParent.offsetTop + link.offsetTop + link.offsetHeight - 4
-            , left = link.offsetParent.offsetLeft + link.offsetLeft
+            , lr = viewLastComment
+              ? `right: ${window.innerWidth - (link.offsetParent.offsetLeft + link.offsetParent.offsetWidth)}px`
+              : `left: ${link.offsetParent.offsetLeft + link.offsetLeft}px`
             preview = document.body._ins('beforeend',
               `<div class="b-comment m-tip x1-comment-preview"
-              style="top: ${top}px; left: ${left}px; transform: scaleY(0);">
+              style="top: ${top}px; ${lr}; transform: scaleY(0);">
               ${refCom.innerHTML}</div>`, true)
             setTimeout(() => preview.style.transform = '', 50)
             // cross-reference link and preview
@@ -708,6 +721,14 @@ const comments = {
         }
       }
     }, {capture: true})
+  },
+  getLastComment: async function(post) {
+    let res = await fetch(`/news/res/${post}/`)
+    if (!res?.ok) return false;
+    let html = await res.text()
+    if (!html) return false;
+    let dom = Range.prototype.createContextualFragment.bind(document.createRange())(html)
+    return Array.from(dom.querySelectorAll('.b-comment')).reverse()?.[0]
   },
   setupSelection: function() {
     let debounce = null

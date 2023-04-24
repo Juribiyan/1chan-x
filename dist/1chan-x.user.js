@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.1.2
+// @version      1.2.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -197,34 +197,34 @@ function GM_getJSON(_x2) {
   return _GM_getJSON.apply(this, arguments);
 } // ======================================== Site settings =========================================
 function _GM_getJSON() {
-  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20(key) {
+  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee22(key) {
     var v, data;
-    return _regeneratorRuntime().wrap(function _callee20$(_context20) {
-      while (1) switch (_context20.prev = _context20.next) {
+    return _regeneratorRuntime().wrap(function _callee22$(_context23) {
+      while (1) switch (_context23.prev = _context23.next) {
         case 0:
-          _context20.next = 2;
+          _context23.next = 2;
           return GM.getValue(key);
         case 2:
-          v = _context20.sent;
+          v = _context23.sent;
           if (v) {
-            _context20.next = 5;
+            _context23.next = 5;
             break;
           }
-          return _context20.abrupt("return", null);
+          return _context23.abrupt("return", null);
         case 5:
-          _context20.prev = 5;
+          _context23.prev = 5;
           data = JSON.parse(v);
-          return _context20.abrupt("return", data);
+          return _context23.abrupt("return", data);
         case 10:
-          _context20.prev = 10;
-          _context20.t0 = _context20["catch"](5);
+          _context23.prev = 10;
+          _context23.t0 = _context23["catch"](5);
           GM.deleteValue(key);
           console.warn("Deleted \"".concat(key, "\" from GM storage due to wrong format"));
         case 14:
         case "end":
-          return _context20.stop();
+          return _context23.stop();
       }
-    }, _callee20, null, [[5, 10]]);
+    }, _callee22, null, [[5, 10]]);
   }));
   return _GM_getJSON.apply(this, arguments);
 }
@@ -352,6 +352,8 @@ var comments = {
           childList: true
         });
       });
+    }
+    if (['newsentry', 'thread', 'board', 'news'].includes(state)) {
       this.setupPreviews();
     }
     this.setupSelection();
@@ -721,71 +723,173 @@ var comments = {
   },
   setupPreviews: function setupPreviews() {
     var _document$location$pa2;
-    var boardPrefix = app.state == 'thread' || app.state == 'board' ? ((_document$location$pa2 = document.location.pathname.split('/')) === null || _document$location$pa2 === void 0 ? void 0 : _document$location$pa2[1]) + '_' : '';
-    document.body.delegateEventListener(['mouseenter', 'mouseleave'], ['.x1-comment-preview .js-cross-link', '.x1-cross-link', '.x1-comment-preview'], function (ev) {
-      var isLink = !this.classList.contains('x1-comment-preview'),
-        link = isLink ? this : this === null || this === void 0 ? void 0 : this._boundLink,
-        preview = isLink ? this === null || this === void 0 ? void 0 : this._boundPreview : this;
-      if (ev.type == 'mouseenter') {
-        if (!preview) {
-          // Create preview
-          var n = this.innerText.slice(2),
-            refCom = $("#comment_".concat(boardPrefix).concat(n));
-          if (refCom) {
-            var top = link.offsetParent.offsetTop + link.offsetTop + link.offsetHeight - 4,
-              left = link.offsetParent.offsetLeft + link.offsetLeft;
-            preview = document.body._ins('beforeend', "<div class=\"b-comment m-tip x1-comment-preview\"\n              style=\"top: ".concat(top, "px; left: ").concat(left, "px; transform: scaleY(0);\">\n              ").concat(refCom.innerHTML, "</div>"), true);
-            setTimeout(function () {
-              return preview.style.transform = '';
-            }, 50);
-            // cross-reference link and preview
-            preview._boundLink = link;
-            link._boundPreview = preview;
-            // cross-reference stacked previews
-            var parent = link.findParent('.b-comment');
-            if (parent !== null && parent !== void 0 && parent.classList.contains('m-tip')) {
-              parent._childPreview = preview;
-              preview._parentPreview = parent;
-            }
-          }
-        } else {
-          // Save previews from exiting
-          while (preview) {
-            var _preview, _preview2;
-            clearTimeout((_preview = preview) === null || _preview === void 0 ? void 0 : _preview._exitTimeout);
-            preview._exitTimeout = null;
-            preview = (_preview2 = preview) === null || _preview2 === void 0 ? void 0 : _preview2._parentPreview;
-          }
-        }
-      } else {
-        var _loop = function _loop() {
-          var _preview3;
-          // Schedule preview exiting
-          var p = preview,
-            l = (_preview3 = preview) === null || _preview3 === void 0 ? void 0 : _preview3._boundLink;
-          if (!preview._exitTimeout) {
-            preview._exitTimeout = setTimeout(function () {
-              p._exitTimeout = null;
-              p.style.transform = "scaleY(0)";
-              setTimeout(function () {
-                return p.remove();
-              }, 200);
-              if (l) {
-                l._boundPreview = null;
+    var boardPrefix = app.state == 'thread' || app.state == 'board' ? ((_document$location$pa2 = document.location.pathname.split('/')) === null || _document$location$pa2 === void 0 ? void 0 : _document$location$pa2[1]) + '_' : '',
+      self = this;
+    document.body.delegateEventListener(['mouseenter', 'mouseleave'], ['.x1-comment-preview .js-cross-link', '.x1-cross-link', '.x1-comment-preview', '.b-blog-entry_b-info_b-link'], /*#__PURE__*/function () {
+      var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(ev) {
+        var isLink, link, preview, viewLastComment, _this$_$, _this$_$$href, _this$_$$href$match, n, refCom, top, lr, parent, _preview, _preview2, _loop;
+        return _regeneratorRuntime().wrap(function _callee6$(_context7) {
+          while (1) switch (_context7.prev = _context7.next) {
+            case 0:
+              isLink = !this.classList.contains('x1-comment-preview'), link = isLink ? this : this === null || this === void 0 ? void 0 : this._boundLink, preview = isLink ? this === null || this === void 0 ? void 0 : this._boundPreview : this, viewLastComment = false;
+              if (!this.classList.contains('b-blog-entry_b-info_b-link')) {
+                _context7.next = 7;
+                break;
               }
-            }, 200);
+              if (!(app.state != 'news')) {
+                _context7.next = 4;
+                break;
+              }
+              return _context7.abrupt("return", false);
+            case 4:
+              viewLastComment = (_this$_$ = this._$('a')) === null || _this$_$ === void 0 ? void 0 : (_this$_$$href = _this$_$.href) === null || _this$_$$href === void 0 ? void 0 : (_this$_$$href$match = _this$_$$href.match(/res\/([\d]+)/)) === null || _this$_$$href$match === void 0 ? void 0 : _this$_$$href$match[1];
+              if (viewLastComment) {
+                _context7.next = 7;
+                break;
+              }
+              return _context7.abrupt("return", false);
+            case 7:
+              if (!(ev.type == 'mouseenter')) {
+                _context7.next = 24;
+                break;
+              }
+              if (preview) {
+                _context7.next = 21;
+                break;
+              }
+              n = this.innerText.slice(2);
+              if (!viewLastComment) {
+                _context7.next = 16;
+                break;
+              }
+              _context7.next = 13;
+              return self.getLastComment(viewLastComment);
+            case 13:
+              _context7.t0 = _context7.sent;
+              _context7.next = 17;
+              break;
+            case 16:
+              _context7.t0 = $("#comment_".concat(boardPrefix).concat(n));
+            case 17:
+              refCom = _context7.t0;
+              if (refCom) {
+                top = link.offsetParent.offsetTop + link.offsetTop + link.offsetHeight - 4, lr = viewLastComment ? "right: ".concat(window.innerWidth - (link.offsetParent.offsetLeft + link.offsetParent.offsetWidth), "px") : "left: ".concat(link.offsetParent.offsetLeft + link.offsetLeft, "px");
+                preview = document.body._ins('beforeend', "<div class=\"b-comment m-tip x1-comment-preview\"\n              style=\"top: ".concat(top, "px; ").concat(lr, "; transform: scaleY(0);\">\n              ").concat(refCom.innerHTML, "</div>"), true);
+                setTimeout(function () {
+                  return preview.style.transform = '';
+                }, 50);
+                // cross-reference link and preview
+                preview._boundLink = link;
+                link._boundPreview = preview;
+                // cross-reference stacked previews
+                parent = link.findParent('.b-comment');
+                if (parent !== null && parent !== void 0 && parent.classList.contains('m-tip')) {
+                  parent._childPreview = preview;
+                  preview._parentPreview = parent;
+                }
+              }
+              _context7.next = 22;
+              break;
+            case 21:
+              // Save previews from exiting
+              while (preview) {
+                clearTimeout((_preview = preview) === null || _preview === void 0 ? void 0 : _preview._exitTimeout);
+                preview._exitTimeout = null;
+                preview = (_preview2 = preview) === null || _preview2 === void 0 ? void 0 : _preview2._parentPreview;
+              }
+            case 22:
+              _context7.next = 29;
+              break;
+            case 24:
+              _loop = /*#__PURE__*/_regeneratorRuntime().mark(function _loop() {
+                var _preview3;
+                var p, l;
+                return _regeneratorRuntime().wrap(function _loop$(_context6) {
+                  while (1) switch (_context6.prev = _context6.next) {
+                    case 0:
+                      // Schedule preview exiting
+                      p = preview, l = (_preview3 = preview) === null || _preview3 === void 0 ? void 0 : _preview3._boundLink;
+                      if (!preview._exitTimeout) {
+                        preview._exitTimeout = setTimeout(function () {
+                          p._exitTimeout = null;
+                          p.style.transform = "scaleY(0)";
+                          setTimeout(function () {
+                            return p.remove();
+                          }, 200);
+                          if (l) {
+                            l._boundPreview = null;
+                          }
+                        }, 200);
+                      }
+                      preview = isLink ? p === null || p === void 0 ? void 0 : p._childPreview : p === null || p === void 0 ? void 0 : p._parentPreview;
+                    case 3:
+                    case "end":
+                      return _context6.stop();
+                  }
+                }, _loop);
+              });
+            case 25:
+              if (!preview) {
+                _context7.next = 29;
+                break;
+              }
+              return _context7.delegateYield(_loop(), "t1", 27);
+            case 27:
+              _context7.next = 25;
+              break;
+            case 29:
+            case "end":
+              return _context7.stop();
           }
-          preview = isLink ? p === null || p === void 0 ? void 0 : p._childPreview : p === null || p === void 0 ? void 0 : p._parentPreview;
-        };
-        // Mouseleave
-        while (preview) {
-          _loop();
-        }
-      }
-    }, {
+        }, _callee6, this);
+      }));
+      return function (_x9) {
+        return _ref6.apply(this, arguments);
+      };
+    }(), {
       capture: true
     });
   },
+  getLastComment: function () {
+    var _getLastComment = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(post) {
+      var _Array$from$reverse;
+      var res, html, dom;
+      return _regeneratorRuntime().wrap(function _callee7$(_context8) {
+        while (1) switch (_context8.prev = _context8.next) {
+          case 0:
+            _context8.next = 2;
+            return fetch("/news/res/".concat(post, "/"));
+          case 2:
+            res = _context8.sent;
+            if (res !== null && res !== void 0 && res.ok) {
+              _context8.next = 5;
+              break;
+            }
+            return _context8.abrupt("return", false);
+          case 5:
+            _context8.next = 7;
+            return res.text();
+          case 7:
+            html = _context8.sent;
+            if (html) {
+              _context8.next = 10;
+              break;
+            }
+            return _context8.abrupt("return", false);
+          case 10:
+            dom = Range.prototype.createContextualFragment.bind(document.createRange())(html);
+            return _context8.abrupt("return", (_Array$from$reverse = Array.from(dom.querySelectorAll('.b-comment')).reverse()) === null || _Array$from$reverse === void 0 ? void 0 : _Array$from$reverse[0]);
+          case 12:
+          case "end":
+            return _context8.stop();
+        }
+      }, _callee7);
+    }));
+    function getLastComment(_x10) {
+      return _getLastComment.apply(this, arguments);
+    }
+    return getLastComment;
+  }(),
   setupSelection: function setupSelection() {
     var _this9 = this;
     var debounce = null;
@@ -814,47 +918,47 @@ var comments = {
 };
 var formAugmentation = {
   init: function () {
-    var _init = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
+    var _init = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9() {
       var _this10 = this;
-      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-        while (1) switch (_context7.prev = _context7.next) {
+      return _regeneratorRuntime().wrap(function _callee9$(_context10) {
+        while (1) switch (_context10.prev = _context10.next) {
           case 0:
             this.area = this.getTextArea();
             if (!this.area) {
-              _context7.next = 7;
+              _context10.next = 7;
               break;
             }
-            _context7.next = 4;
+            _context10.next = 4;
             return this.setupExtraPanel();
           case 4:
             this.setupMarkupPanel();
             this.setupImgLinkPasting();
             ['smileys', 'snippets'].forEach( /*#__PURE__*/function () {
-              var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(type) {
-                return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-                  while (1) switch (_context6.prev = _context6.next) {
+              var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(type) {
+                return _regeneratorRuntime().wrap(function _callee8$(_context9) {
+                  while (1) switch (_context9.prev = _context9.next) {
                     case 0:
-                      _context6.next = 2;
+                      _context9.next = 2;
                       return _this10["init_".concat(type)]();
                     case 2:
-                      return _context6.abrupt("return", _context6.sent);
+                      return _context9.abrupt("return", _context9.sent);
                     case 3:
                     case "end":
-                      return _context6.stop();
+                      return _context9.stop();
                   }
-                }, _callee6);
+                }, _callee8);
               }));
-              return function (_x9) {
-                return _ref6.apply(this, arguments);
+              return function (_x11) {
+                return _ref7.apply(this, arguments);
               };
             }());
           case 7:
             this.init_images(); // always needed so a user can add image snippets
           case 8:
           case "end":
-            return _context7.stop();
+            return _context10.stop();
         }
-      }, _callee7, this);
+      }, _callee9, this);
     }));
     function init() {
       return _init.apply(this, arguments);
@@ -886,7 +990,7 @@ var formAugmentation = {
     }
   },
   setupExtraPanel: function () {
-    var _setupExtraPanel = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8() {
+    var _setupExtraPanel = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee10() {
       var state,
         _this$getExtraPanelLo,
         _this$getExtraPanelLo2,
@@ -897,11 +1001,11 @@ var formAugmentation = {
         panes,
         p,
         panel,
-        _args8 = arguments;
-      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-        while (1) switch (_context8.prev = _context8.next) {
+        _args11 = arguments;
+      return _regeneratorRuntime().wrap(function _callee10$(_context11) {
+        while (1) switch (_context11.prev = _context11.next) {
           case 0:
-            state = _args8.length > 0 && _args8[0] !== undefined ? _args8[0] : app.state;
+            state = _args11.length > 0 && _args11[0] !== undefined ? _args11[0] : app.state;
             _this$getExtraPanelLo = this.getExtraPanelLocation(), _this$getExtraPanelLo2 = _slicedToArray(_this$getExtraPanelLo, 2), selector = _this$getExtraPanelLo2[0], relativePosition = _this$getExtraPanelLo2[1], supportedPanes = {
               'smileys': 'Смайлики',
               'snippets': 'Сниппеты',
@@ -942,9 +1046,9 @@ var formAugmentation = {
             });
           case 7:
           case "end":
-            return _context8.stop();
+            return _context11.stop();
         }
-      }, _callee8, this);
+      }, _callee10, this);
     }));
     function setupExtraPanel() {
       return _setupExtraPanel.apply(this, arguments);
@@ -982,19 +1086,19 @@ var formAugmentation = {
     }
   },
   insertText: function insertText() {
-    var _ref7 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref7$start = _ref7.start,
-      start = _ref7$start === void 0 ? '' : _ref7$start,
-      _ref7$end = _ref7.end,
-      end = _ref7$end === void 0 ? '' : _ref7$end,
-      _ref7$forceInline = _ref7.forceInline,
-      forceInline = _ref7$forceInline === void 0 ? false : _ref7$forceInline,
-      _ref7$innerNewLine = _ref7.innerNewLine,
-      innerNewLine = _ref7$innerNewLine === void 0 ? false : _ref7$innerNewLine,
-      _ref7$outerNewLine = _ref7.outerNewLine,
-      outerNewLine = _ref7$outerNewLine === void 0 ? false : _ref7$outerNewLine,
-      _ref7$replace = _ref7.replace,
-      replace = _ref7$replace === void 0 ? false : _ref7$replace;
+    var _ref8 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref8$start = _ref8.start,
+      start = _ref8$start === void 0 ? '' : _ref8$start,
+      _ref8$end = _ref8.end,
+      end = _ref8$end === void 0 ? '' : _ref8$end,
+      _ref8$forceInline = _ref8.forceInline,
+      forceInline = _ref8$forceInline === void 0 ? false : _ref8$forceInline,
+      _ref8$innerNewLine = _ref8.innerNewLine,
+      innerNewLine = _ref8$innerNewLine === void 0 ? false : _ref8$innerNewLine,
+      _ref8$outerNewLine = _ref8.outerNewLine,
+      outerNewLine = _ref8$outerNewLine === void 0 ? false : _ref8$outerNewLine,
+      _ref8$replace = _ref8.replace,
+      replace = _ref8$replace === void 0 ? false : _ref8$replace;
     var val = this.area.value,
       selStart = this.area.selectionStart,
       selEnd = this.area.selectionEnd,
@@ -1097,11 +1201,11 @@ var formAugmentation = {
   defaultImageServices: {
     imgur: {
       analyze: function () {
-        var _analyze = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(txt) {
-          return _regeneratorRuntime().wrap(function _callee9$(_context9) {
-            while (1) switch (_context9.prev = _context9.next) {
+        var _analyze = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee11(txt) {
+          return _regeneratorRuntime().wrap(function _callee11$(_context12) {
+            while (1) switch (_context12.prev = _context12.next) {
               case 0:
-                return _context9.abrupt("return", new Promise(function (resolve, reject) {
+                return _context12.abrupt("return", new Promise(function (resolve, reject) {
                   var m = txt.match(/^(?:https?\:\/\/)?(?:i\.)?imgur\.com\/(.+\/)?([^\/\.\s]+)(?:\..*)?$/i);
                   if (!m) resolve(false);
                   if (m[1]) {
@@ -1121,11 +1225,11 @@ var formAugmentation = {
                 }));
               case 1:
               case "end":
-                return _context9.stop();
+                return _context12.stop();
             }
-          }, _callee9);
+          }, _callee11);
         }));
-        function analyze(_x10) {
+        function analyze(_x12) {
           return _analyze.apply(this, arguments);
         }
         return analyze;
@@ -1157,52 +1261,52 @@ var formAugmentation = {
   },
   imageServices: {},
   parseLink: function () {
-    var _parseLink = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee10(txt) {
+    var _parseLink = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee12(txt) {
       var svc, _txt$match, service, code;
-      return _regeneratorRuntime().wrap(function _callee10$(_context10) {
-        while (1) switch (_context10.prev = _context10.next) {
+      return _regeneratorRuntime().wrap(function _callee12$(_context13) {
+        while (1) switch (_context13.prev = _context13.next) {
           case 0:
-            _context10.t0 = _regeneratorRuntime().keys(this.imageServices);
+            _context13.t0 = _regeneratorRuntime().keys(this.imageServices);
           case 1:
-            if ((_context10.t1 = _context10.t0()).done) {
-              _context10.next = 18;
+            if ((_context13.t1 = _context13.t0()).done) {
+              _context13.next = 18;
               break;
             }
-            svc = _context10.t1.value;
+            svc = _context13.t1.value;
             service = this.imageServices[svc];
             if (!service.analyze) {
-              _context10.next = 10;
+              _context13.next = 10;
               break;
             }
-            _context10.next = 7;
+            _context13.next = 7;
             return service.analyze(txt);
           case 7:
-            _context10.t2 = _context10.sent;
-            _context10.next = 11;
+            _context13.t2 = _context13.sent;
+            _context13.next = 11;
             break;
           case 10:
-            _context10.t2 = (_txt$match = txt.match(service.exp)) === null || _txt$match === void 0 ? void 0 : _txt$match[1];
+            _context13.t2 = (_txt$match = txt.match(service.exp)) === null || _txt$match === void 0 ? void 0 : _txt$match[1];
           case 11:
-            code = _context10.t2;
+            code = _context13.t2;
             if (!code) {
-              _context10.next = 16;
+              _context13.next = 16;
               break;
             }
             // For the case when a service behaves like generic but must store data like named to be used by other sites
             if (service.getCompactCode) code = service.getCompactCode(code);
-            return _context10.abrupt("return", [svc, code]);
+            return _context13.abrupt("return", [svc, code]);
           case 16:
-            _context10.next = 1;
+            _context13.next = 1;
             break;
           case 18:
-            return _context10.abrupt("return", [null, null]);
+            return _context13.abrupt("return", [null, null]);
           case 19:
           case "end":
-            return _context10.stop();
+            return _context13.stop();
         }
-      }, _callee10, this);
+      }, _callee12, this);
     }));
-    function parseLink(_x11) {
+    function parseLink(_x13) {
       return _parseLink.apply(this, arguments);
     }
     return parseLink;
@@ -1210,17 +1314,17 @@ var formAugmentation = {
   setupImgLinkPasting: function setupImgLinkPasting() {
     var _this14 = this;
     this.area.addEventListener('paste', /*#__PURE__*/function () {
-      var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee11(ev) {
+      var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee13(ev) {
         var _ev$clipboardData;
         var txt, _yield$_this14$parseL, _yield$_this14$parseL2, service, code, codeWrapped;
-        return _regeneratorRuntime().wrap(function _callee11$(_context11) {
-          while (1) switch (_context11.prev = _context11.next) {
+        return _regeneratorRuntime().wrap(function _callee13$(_context14) {
+          while (1) switch (_context14.prev = _context14.next) {
             case 0:
               txt = ev === null || ev === void 0 ? void 0 : (_ev$clipboardData = ev.clipboardData) === null || _ev$clipboardData === void 0 ? void 0 : _ev$clipboardData.getData('text');
-              _context11.next = 3;
+              _context14.next = 3;
               return _this14.parseLink(txt);
             case 3:
-              _yield$_this14$parseL = _context11.sent;
+              _yield$_this14$parseL = _context14.sent;
               _yield$_this14$parseL2 = _slicedToArray(_yield$_this14$parseL, 2);
               service = _yield$_this14$parseL2[0];
               code = _yield$_this14$parseL2[1];
@@ -1235,12 +1339,12 @@ var formAugmentation = {
               }
             case 8:
             case "end":
-              return _context11.stop();
+              return _context14.stop();
           }
-        }, _callee11);
+        }, _callee13);
       }));
-      return function (_x12) {
-        return _ref8.apply(this, arguments);
+      return function (_x14) {
+        return _ref9.apply(this, arguments);
       };
     }());
   },
@@ -1260,11 +1364,11 @@ var formAugmentation = {
     GM.setValue('text-snippets', JSON.stringify(this.textSnippets));
   },
   init_images: function () {
-    var _init_images = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee12() {
+    var _init_images = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee14() {
       var _this15 = this;
       var images, _iterator2, _step2, entry, svc, code, thumb, _entry$split, _entry$split2, skip, service;
-      return _regeneratorRuntime().wrap(function _callee12$(_context12) {
-        while (1) switch (_context12.prev = _context12.next) {
+      return _regeneratorRuntime().wrap(function _callee14$(_context15) {
+        while (1) switch (_context15.prev = _context15.next) {
           case 0:
             // Filter and modify image services for the specific site, generate reverse expressions
             siteSpecific.current.imgSvc.supported.forEach(function (svc) {
@@ -1292,37 +1396,37 @@ var formAugmentation = {
                 console.warn('Unable to generate reverse expression for: ', svc);
               }
             });
-            _context12.next = 3;
+            _context15.next = 3;
             return GM_getJSON('image-snippets');
           case 3:
-            images = _context12.sent;
+            images = _context15.sent;
             if (!(images !== null && images !== void 0 && images.length)) {
-              _context12.next = 36;
+              _context15.next = 36;
               break;
             }
             _iterator2 = _createForOfIteratorHelper(images);
-            _context12.prev = 6;
+            _context15.prev = 6;
             _iterator2.s();
           case 8:
             if ((_step2 = _iterator2.n()).done) {
-              _context12.next = 28;
+              _context15.next = 28;
               break;
             }
             entry = _step2.value;
             svc = void 0, code = void 0, thumb = void 0;
-            _context12.prev = 11;
+            _context15.prev = 11;
             _entry$split = entry.split(' ');
             _entry$split2 = _slicedToArray(_entry$split, 3);
             svc = _entry$split2[0];
             code = _entry$split2[1];
             thumb = _entry$split2[2];
-            _context12.next = 23;
+            _context15.next = 23;
             break;
           case 19:
-            _context12.prev = 19;
-            _context12.t0 = _context12["catch"](11);
+            _context15.prev = 19;
+            _context15.t0 = _context15["catch"](11);
             console.warn('Image snippet has wrong format: ', entry);
-            return _context12.abrupt("continue", 26);
+            return _context15.abrupt("continue", 26);
           case 23:
             // Unsupported snippets will be added to the model to keep it 
             skip = true; // consistent across sites but no actual snipet will be created
@@ -1344,24 +1448,24 @@ var formAugmentation = {
               save: false
             });
           case 26:
-            _context12.next = 8;
+            _context15.next = 8;
             break;
           case 28:
-            _context12.next = 33;
+            _context15.next = 33;
             break;
           case 30:
-            _context12.prev = 30;
-            _context12.t1 = _context12["catch"](6);
-            _iterator2.e(_context12.t1);
+            _context15.prev = 30;
+            _context15.t1 = _context15["catch"](6);
+            _iterator2.e(_context15.t1);
           case 33:
-            _context12.prev = 33;
+            _context15.prev = 33;
             _iterator2.f();
-            return _context12.finish(33);
+            return _context15.finish(33);
           case 36:
           case "end":
-            return _context12.stop();
+            return _context15.stop();
         }
-      }, _callee12, this, [[6, 30, 33, 36], [11, 19]]);
+      }, _callee14, this, [[6, 30, 33, 36], [11, 19]]);
     }));
     function init_images() {
       return _init_images.apply(this, arguments);
@@ -1390,17 +1494,17 @@ var formAugmentation = {
   addImageSnippet: /*async*/function addImageSnippet() {
     var _$2,
       _this16 = this;
-    var _ref9 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      service = _ref9.service,
-      code = _ref9.code,
-      _ref9$thumb = _ref9.thumb,
-      thumb = _ref9$thumb === void 0 ? false : _ref9$thumb,
-      _ref9$save = _ref9.save,
-      save = _ref9$save === void 0 ? true : _ref9$save,
-      _ref9$skip = _ref9.skip,
-      skip = _ref9$skip === void 0 ? false : _ref9$skip,
-      _ref9$fromPost = _ref9.fromPost,
-      fromPost = _ref9$fromPost === void 0 ? false : _ref9$fromPost;
+    var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      service = _ref10.service,
+      code = _ref10.code,
+      _ref10$thumb = _ref10.thumb,
+      thumb = _ref10$thumb === void 0 ? false : _ref10$thumb,
+      _ref10$save = _ref10.save,
+      save = _ref10$save === void 0 ? true : _ref10$save,
+      _ref10$skip = _ref10.skip,
+      skip = _ref10$skip === void 0 ? false : _ref10$skip,
+      _ref10$fromPost = _ref10.fromPost,
+      fromPost = _ref10$fromPost === void 0 ? false : _ref10$fromPost;
     var dup = this.findImageSnippet(service, code);
     if (dup) {
       console.warn('Image already present');
@@ -1442,16 +1546,16 @@ var formAugmentation = {
     return codeWrapped;
   },
   init_snippets: function () {
-    var _init_snippets = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee13() {
+    var _init_snippets = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee15() {
       var _this17 = this;
       var snippets;
-      return _regeneratorRuntime().wrap(function _callee13$(_context13) {
-        while (1) switch (_context13.prev = _context13.next) {
+      return _regeneratorRuntime().wrap(function _callee15$(_context16) {
+        while (1) switch (_context16.prev = _context16.next) {
           case 0:
-            _context13.next = 2;
+            _context16.next = 2;
             return GM_getJSON('text-snippets');
           case 2:
-            snippets = _context13.sent;
+            snippets = _context16.sent;
             if (snippets !== null && snippets !== void 0 && snippets.length) {
               snippets.forEach(function (txt) {
                 if (typeof txt == 'string') {
@@ -1461,9 +1565,9 @@ var formAugmentation = {
             }
           case 4:
           case "end":
-            return _context13.stop();
+            return _context16.stop();
         }
-      }, _callee13);
+      }, _callee15);
     }));
     function init_snippets() {
       return _init_snippets.apply(this, arguments);
@@ -1533,21 +1637,21 @@ var formAugmentation = {
 };
 var hiddenItems = {
   init: function () {
-    var _init2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee14() {
-      return _regeneratorRuntime().wrap(function _callee14$(_context14) {
-        while (1) switch (_context14.prev = _context14.next) {
+    var _init2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee16() {
+      return _regeneratorRuntime().wrap(function _callee16$(_context17) {
+        while (1) switch (_context17.prev = _context17.next) {
           case 0:
             this.initPosts();
-            _context14.next = 3;
+            _context17.next = 3;
             return this.initText();
           case 3:
-            _context14.next = 5;
+            _context17.next = 5;
             return this.initImages();
           case 5:
           case "end":
-            return _context14.stop();
+            return _context17.stop();
         }
-      }, _callee14, this);
+      }, _callee16, this);
     }));
     function init() {
       return _init2.apply(this, arguments);
@@ -1601,29 +1705,29 @@ var hiddenItems = {
     this.saveImages();
   },
   initImages: function () {
-    var _initImages = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee15() {
+    var _initImages = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee17() {
       var _this19 = this;
       var images;
-      return _regeneratorRuntime().wrap(function _callee15$(_context15) {
-        while (1) switch (_context15.prev = _context15.next) {
+      return _regeneratorRuntime().wrap(function _callee17$(_context18) {
+        while (1) switch (_context18.prev = _context18.next) {
           case 0:
             this.url_area = $('#x1-url-hidelist');
             $('#x1-update-url-hidelist').addEventListener('click', function () {
               return _this19.updateImagesFromUI();
             });
-            _context15.next = 4;
+            _context18.next = 4;
             return GM_getJSON('image-hidelist');
           case 4:
-            images = _context15.sent;
+            images = _context18.sent;
             if (images !== null && images !== void 0 && images.length) {
               this.processImageList(images);
               this.updateImageUI();
             }
           case 6:
           case "end":
-            return _context15.stop();
+            return _context18.stop();
         }
-      }, _callee15, this);
+      }, _callee17, this);
     }));
     function initImages() {
       return _initImages.apply(this, arguments);
@@ -1647,11 +1751,11 @@ var hiddenItems = {
     return txt.trim().toLowerCase();
   },
   addText: function addText(txt) {
-    var _ref10 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref10$refresh = _ref10.refresh,
-      refresh = _ref10$refresh === void 0 ? true : _ref10$refresh,
-      _ref10$tryRegExp = _ref10.tryRegExp,
-      tryRegExp = _ref10$tryRegExp === void 0 ? false : _ref10$tryRegExp;
+    var _ref11 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref11$refresh = _ref11.refresh,
+      refresh = _ref11$refresh === void 0 ? true : _ref11$refresh,
+      _ref11$tryRegExp = _ref11.tryRegExp,
+      tryRegExp = _ref11$tryRegExp === void 0 ? false : _ref11$tryRegExp;
     txt = this.normalizeText(txt);
     if (!txt || this.texts.includes(txt)) return;
     var rx = false;
@@ -1724,20 +1828,20 @@ var hiddenItems = {
     if (fromUI) settings.flashLabel('text-hidelist');
   },
   initText: function () {
-    var _initText = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee16() {
+    var _initText = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18() {
       var _this22 = this;
       var texts;
-      return _regeneratorRuntime().wrap(function _callee16$(_context16) {
-        while (1) switch (_context16.prev = _context16.next) {
+      return _regeneratorRuntime().wrap(function _callee18$(_context19) {
+        while (1) switch (_context19.prev = _context19.next) {
           case 0:
             this.text_area = $('#x1-text-hidelist');
             $('#x1-update-text-hidelist').addEventListener('click', function () {
               return _this22.updateTextFromUI();
             });
-            _context16.next = 4;
+            _context19.next = 4;
             return GM_getJSON('text-hidelist');
           case 4:
-            texts = _context16.sent;
+            texts = _context19.sent;
             if (texts !== null && texts !== void 0 && texts.length) {
               this.processTextList(texts);
               this.updateTextUI();
@@ -1745,9 +1849,9 @@ var hiddenItems = {
             }
           case 6:
           case "end":
-            return _context16.stop();
+            return _context19.stop();
         }
-      }, _callee16, this);
+      }, _callee18, this);
     }));
     function initText() {
       return _initText.apply(this, arguments);
@@ -1865,25 +1969,25 @@ var hiddenItems = {
     } else return false;
   },
   scanImage: function () {
-    var _scanImage = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee17(img, post, isUnhidden) {
+    var _scanImage = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee19(img, post, isUnhidden) {
       var toHide, imgData, _yield$comments$getIm, hideByImg, hideByLink, link;
-      return _regeneratorRuntime().wrap(function _callee17$(_context17) {
-        while (1) switch (_context17.prev = _context17.next) {
+      return _regeneratorRuntime().wrap(function _callee19$(_context20) {
+        while (1) switch (_context20.prev = _context20.next) {
           case 0:
             post.classList.remove('x1-hidden-by-image');
             toHide = false;
-            _context17.next = 4;
+            _context20.next = 4;
             return comments.getImgData(img);
           case 4:
-            imgData = _context17.sent;
+            imgData = _context20.sent;
             if (!imgData) {
-              _context17.next = 14;
+              _context20.next = 14;
               break;
             }
-            _context17.next = 8;
+            _context20.next = 8;
             return comments.getImgData(img);
           case 8:
-            _yield$comments$getIm = _context17.sent;
+            _yield$comments$getIm = _context20.sent;
             hideByImg = _yield$comments$getIm.hideByImg;
             hideByLink = _yield$comments$getIm.hideByLink;
             link = _yield$comments$getIm.link;
@@ -1891,11 +1995,11 @@ var hiddenItems = {
             if (this.isImgHidden(link, hideByImg, hideByLink) && !isUnhidden) post.classList.add('x1-post-hidden', 'x1-hidden-by-image');
           case 14:
           case "end":
-            return _context17.stop();
+            return _context20.stop();
         }
-      }, _callee17, this);
+      }, _callee19, this);
     }));
-    function scanImage(_x13, _x14, _x15) {
+    function scanImage(_x15, _x16, _x17) {
       return _scanImage.apply(this, arguments);
     }
     return scanImage;
@@ -1986,8 +2090,8 @@ function setupPanels() {
   });
 }
 function fixMenuForTouch() {
-  var _ref11;
-  var ul = (_ref11 = $('.b-blog-panel') || $('.b-chat-panel')) === null || _ref11 === void 0 ? void 0 : _ref11._$('ul');
+  var _ref12;
+  var ul = (_ref12 = $('.b-blog-panel') || $('.b-chat-panel')) === null || _ref12 === void 0 ? void 0 : _ref12._$('ul');
   if (ul && ul._$('li img + a')) {
     ul._$$('li').forEach(function (li) {
       var _icon, _icon$textContent;
@@ -2009,10 +2113,10 @@ function fixMenuForTouch() {
 // ============================================= Main =============================================
 
 (function () {
-  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee19() {
+  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee21() {
     var cssURL;
-    return _regeneratorRuntime().wrap(function _callee19$(_context19) {
-      while (1) switch (_context19.prev = _context19.next) {
+    return _regeneratorRuntime().wrap(function _callee21$(_context22) {
+      while (1) switch (_context22.prev = _context22.next) {
         case 0:
           // Add CSS
           cssURL = "https://juribiyan.github.io/1chan-x/css/1chan-x.css";
@@ -2021,13 +2125,13 @@ function fixMenuForTouch() {
           // Add viewport
           document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1\">");
           siteSpecific.init();
-          document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18() {
+          document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20() {
             var state, val;
-            return _regeneratorRuntime().wrap(function _callee18$(_context18) {
-              while (1) switch (_context18.prev = _context18.next) {
+            return _regeneratorRuntime().wrap(function _callee20$(_context21) {
+              while (1) switch (_context21.prev = _context21.next) {
                 case 0:
                   settings.init();
-                  _context18.next = 3;
+                  _context21.next = 3;
                   return hiddenItems.init();
                 case 3:
                   state = determineState();
@@ -2036,10 +2140,10 @@ function fixMenuForTouch() {
                     $('.l-wrap').classList.add("x1-state-".concat(state));
                   }
                   if (!(stateHandlers !== null && stateHandlers !== void 0 && stateHandlers[state])) {
-                    _context18.next = 8;
+                    _context21.next = 8;
                     break;
                   }
-                  _context18.next = 8;
+                  _context21.next = 8;
                   return stateHandlers[state]();
                 case 8:
                   setupPanels();
@@ -2052,15 +2156,15 @@ function fixMenuForTouch() {
                   }
                 case 12:
                 case "end":
-                  return _context18.stop();
+                  return _context21.stop();
               }
-            }, _callee18);
+            }, _callee20);
           })));
         case 5:
         case "end":
-          return _context19.stop();
+          return _context22.stop();
       }
-    }, _callee19);
+    }, _callee21);
   }));
   function main() {
     return _main.apply(this, arguments);
