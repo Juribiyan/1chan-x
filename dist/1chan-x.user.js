@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.2.0
+// @version      1.3.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -486,6 +486,7 @@ var comments = {
           case 4:
             hiddenItems.scanPost(com, body, true);
             this.replaceSmileys(body);
+            this.decodeAudio(body);
             [].concat(_toConsumableArray(body._$$('img:not(.smiley):not(.x1-warning)')), _toConsumableArray(body._$$('video'))).forEach(function (img) {
               _this8.processImage(img, com);
             });
@@ -526,7 +527,7 @@ var comments = {
                 a.title = "Подозрительная ссылка";
               }
             });
-          case 8:
+          case 9:
           case "end":
             return _context3.stop();
         }
@@ -537,6 +538,18 @@ var comments = {
     }
     return processBody;
   }(),
+  decodeAudio: function decodeAudio(postBody) {
+    postBody._$$('audio').forEach(function (audio) {
+      var url = new URL(audio.src);
+      if (url.hostname == 'tts.voicetech.yandex.net') {
+        var _decodeURIComponent, _decodeURIComponent$m;
+        var text = (_decodeURIComponent = decodeURIComponent(url.search)) === null || _decodeURIComponent === void 0 ? void 0 : (_decodeURIComponent$m = _decodeURIComponent.match(/^\?text=(.+?)&/)) === null || _decodeURIComponent$m === void 0 ? void 0 : _decodeURIComponent$m[1];
+        if (text) {
+          audio._ins('afterend', "<details class=\"x1-audio-content\">\n            <summary class=\"x1-btn\" title=\"\u0420\u0430\u0441\u0448\u0438\u0444\u0440\u043E\u0432\u0430\u0442\u044C \u0430\u0443\u0434\u0438\u043E\">Aa</summary>\n            <div>".concat(text, "</div>\n          </details>"));
+        }
+      }
+    });
+  },
   // Replace codes with samileys which may be present on server, falling back if not
   replaceSmileys: function replaceSmileys(postBody) {
     var walker = document.createTreeWalker(postBody, NodeFilter.SHOW_TEXT, null, false);

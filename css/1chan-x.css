@@ -1253,3 +1253,27 @@
     overflow: visible;
     word-break: break-word;
 }
+audio, .x1-audio-content {
+    vertical-align: middle;
+}
+.x1-audio-content {
+    display: inline-block;
+    color: #306bad;
+    margin-left: 3px;
+}
+.x1-audio-content summary {
+    display: inline;
+    line-height: 1.5;
+    font-weight: bold;
+}
+.x1-audio-content[open] {
+    display: block;
+}
+.x1-audio-content[open] summary {
+    display: none;
+}
+.x1-audio-content div {
+    font-style: italic;
+    font-size: 0.9em;
+    padding: 4px;
+}

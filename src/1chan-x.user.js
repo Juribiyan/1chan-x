@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.2.0
+// @version      1.3.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -465,6 +465,8 @@ const comments = {
 
     this.replaceSmileys(body)
 
+    this.decodeAudio(body)
+
     ;[...body._$$('img:not(.smiley):not(.x1-warning)'), ...body._$$('video')].forEach(img => {
       this.processImage(img, com)
     })
@@ -506,6 +508,20 @@ const comments = {
         a._ins('afterbegin', `<img class="x1-warning${sus=='smiley' ? ' x1-link-sus-with-smiley' : ''}"  src="/ico/warning.png">`)
         a.classList.add('x1-link-sus')
         a.title = "Подозрительная ссылка"
+      }
+    })
+  },
+  decodeAudio: function(postBody) {
+    postBody._$$('audio').forEach(audio => {
+      let url = new URL(audio.src)
+      if (url.hostname == 'tts.voicetech.yandex.net') {
+        let text = decodeURIComponent(url.search)?.match(/^\?text=(.+?)&/)?.[1]
+        if (text) {
+          audio._ins('afterend', `<details class="x1-audio-content">
+            <summary class="x1-btn" title="Расшифровать аудио">Aa</summary>
+            <div>${text}</div>
+          </details>`)
+        }
       }
     })
   },
