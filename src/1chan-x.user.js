@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.3.0
+// @version      1.3.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -398,8 +398,8 @@ const comments = {
       com.classList.add('x1-post-hidden', 'x1-hidden-by-id')
     }
     let eye = `<img src="/ico/oh-my-eyes.png" width="16" height="16">`
-    , huh = `<button class="x1-transparent-btn x1-hideunhide x1-hide-post" title="Скрыть">${eye}</button>
-      <button class="x1-transparent-btn x1-hideunhide x1-unhide-post" title="Раскрыть">${eye}</button>`
+    , huh = `<button type="button" class="x1-transparent-btn x1-hideunhide x1-hide-post" title="Скрыть">${eye}</button>
+      <button type="button" class="x1-transparent-btn x1-hideunhide x1-unhide-post" title="Раскрыть">${eye}</button>`
     if (type == 'comment') {
       com._$('.b-comment_b-info')._ins('beforeend', huh)
     }
@@ -445,7 +445,7 @@ const comments = {
 
     // Text selection in post for hiding
     com._$(type=="post" ? '.b-blog-entry_b-header' : '.b-comment_b-info')
-    ._ins('beforeend', `<button class="x1-btn x1-hide-selected-text" title="Скрыть выделенный текст">Скрыть</button>`, true)
+    ._ins('beforeend', `<button type="button" class="x1-btn x1-hide-selected-text" title="Скрыть выделенный текст">Скрыть</button>`, true)
     .addEventListener('click', () => {
       if (this.selection) {
         hiddenItems.addText(this.selection)
@@ -815,7 +815,7 @@ const formAugmentation = {
     , btns = '', panes = ''
     for (let p in supportedPanes) {
       if (supportedPanes[p]) {
-        btns += `<button class="x1-btn" data-pane="${p}">${supportedPanes[p]}</button>`
+        btns += `<button type="button" class="x1-btn" data-pane="${p}">${supportedPanes[p]}</button>`
         panes += `<div class="x1-xp-pane" id="x1-xp-pane-${p}" style="display:none"></div>`
       }
     }
@@ -911,25 +911,25 @@ const formAugmentation = {
   },
   setupMarkupPanel: function() {
     let markPan = this.area._ins('beforebegin', `<div class="x1-markup-panel">
-      <button class="x1-btn x1-add-text-snippet" title="Сохранить выделенный текст как заготовку" style="float:right">+ Сниппет</button>
+      <button type="button" class="x1-btn x1-add-text-snippet" title="Сохранить выделенный текст как заготовку" style="float:right">+ Сниппет</button>
       <div class="x1-btn-group x1-inline-btn-group">
-        <button class="x1-btn x1-bb-code" title="Жирный" data-start="**" data-end="**"><b>Ж</b></button>
-        <button class="x1-btn x1-bb-code" title="Курсив" data-start="*" data-end="*"><i>К</i></button>
-        <button class="x1-btn x1-bb-code x1-bb-force-inline" title="Зачеркнуто" data-start="--" data-end="--"><s>Z</s></button>
-        <button class="x1-btn x1-bb-code" title="Спойлер" data-start="%%" data-end="%%"><span class="b-spoiler-text">%</span></button>
+        <button type="button" class="x1-btn x1-bb-code" title="Жирный" data-start="**" data-end="**"><b>Ж</b></button>
+        <button type="button" class="x1-btn x1-bb-code" title="Курсив" data-start="*" data-end="*"><i>К</i></button>
+        <button type="button" class="x1-btn x1-bb-code x1-bb-force-inline" title="Зачеркнуто" data-start="--" data-end="--"><s>Z</s></button>
+        <button type="button" class="x1-btn x1-bb-code" title="Спойлер" data-start="%%" data-end="%%"><span class="b-spoiler-text">%</span></button>
       </div> <div class="x1-btn-group x1-inline-btn-group">  
-        <button class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Заголовок" data-start="=== " data-end=" ==="><span style="transform: scale(1.25); display: block">H2</span></button>
-        <button class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Подзаголовок" data-start="## " data-end=" ##">H3</button>
+        <button type="button" class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Заголовок" data-start="=== " data-end=" ==="><span style="transform: scale(1.25); display: block">H2</span></button>
+        <button type="button" class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Подзаголовок" data-start="## " data-end=" ##">H3</button>
       </div> <div class="x1-btn-group x1-inline-btn-group"> 
-        <button class="x1-btn x1-btn-monospace x1-bb-code x1-bb-force-inline" title="Моноширинный" data-start="&#96;" data-end="&#96;">();</button>
-        <button class="x1-btn x1-btn-monospace x1-bb-code x1-bb-outer-newline x1-bb-inner-newline" title="Моноширинный блок" data-start="/---" data-end="&#92;---"><span>{</span><span>}</span></button>
+        <button type="button" class="x1-btn x1-btn-monospace x1-bb-code x1-bb-force-inline" title="Моноширинный" data-start="&#96;" data-end="&#96;">();</button>
+        <button type="button" class="x1-btn x1-btn-monospace x1-bb-code x1-bb-outer-newline x1-bb-inner-newline" title="Моноширинный блок" data-start="/---" data-end="&#92;---"><span>{</span><span>}</span></button>
       </div> <div class="x1-btn-group x1-inline-btn-group">  
-        <button class="x1-btn x1-bb-code x1-bb-force-inline" title="Цитата" data-start="&gt;&gt;" data-end="&lt;&lt;" style="color:#789922">«»</button>
-        <button class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Построчное цитирование" data-start="&gt; " style="color:#789922">&gt; </button>
+        <button type="button" class="x1-btn x1-bb-code x1-bb-force-inline" title="Цитата" data-start="&gt;&gt;" data-end="&lt;&lt;" style="color:#789922">«»</button>
+        <button type="button" class="x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline" title="Построчное цитирование" data-start="&gt; " style="color:#789922">&gt; </button>
       </div>
-      <button class="x1-btn x1-insert-url" title="Вставить ссылку"><div class="x1-url-icon"></div></button>
+      <button type="button" class="x1-btn x1-insert-url" title="Вставить ссылку"><div class="x1-url-icon"></div></button>
       ${siteSpecific.current?.features?.includes('voice') ? 
-        `<button class="x1-btn x1-select-voice" title="Text-to-speech">TTS</button>`
+        `<button type="button" class="x1-btn x1-select-voice" title="Text-to-speech">TTS</button>`
       :''}
     </div>`, true)
     markPan._$$('.x1-bb-code').forEach(bb => {
@@ -970,7 +970,7 @@ const formAugmentation = {
           ).join('') :''}`
         ).join('')}
         </select>
-        <button class="x1-btn x1-tts-insert">Вставить</button>
+        <button type="button" class="x1-btn x1-tts-insert">Вставить</button>
       </div>`)
       markPan._$('.x1-tts-insert').addEventListener('click', ev => {
         ev.preventDefault()
@@ -1584,7 +1584,7 @@ const settings = {
       return
     }
     rp._ins('beforeend', 
-      `<center><button id="x1-settings-open" class="x1-btn">1chan-X</button></center>`
+      `<center><button type="button" id="x1-settings-open" class="x1-btn">1chan-X</button></center>`
     , true).addEventListener('click', () => {
       if (cw?.classList) {
         if(cw.classList.contains('x1-settings-enabled'))
@@ -1601,16 +1601,16 @@ const settings = {
           <h2>Автоскрытие текста <div id="text-hidelist-label" class="x1-label x1-label-succ">Сохранено</div></h2>
           <p>Введите текст или /регулярные выражения/</p>
           <textarea rows="4" id="x1-text-hidelist"></textarea>
-          <center><button id="x1-update-text-hidelist" class="x1-btn">Сохранить</button></center>
+          <center><button type="button" id="x1-update-text-hidelist" class="x1-btn">Сохранить</button></center>
         </div>
         <div class="b-blog-form_b-form_b-field">
           <h2>Автоскрытие изображений <div id="image-hidelist-label" class="x1-label x1-label-succ">Сохранено</div></h2>
           <p>Введите URL изобоажения</p>
           <textarea rows="4" id="x1-url-hidelist"></textarea>
-          <center><button id="x1-update-url-hidelist" class="x1-btn">Сохранить</button></center>
+          <center><button type="button" id="x1-update-url-hidelist" class="x1-btn">Сохранить</button></center>
         </div>
       </div>
-      <center><button id="x1-settings-close" class="x1-btn">Закрыть</button></center>
+      <center><button type="button" id="x1-settings-close" class="x1-btn">Закрыть</button></center>
     </div>`, true)
     this.panel._$('#x1-settings-close').addEventListener('click', () => 
       cw?.classList?.remove('x1-settings-enabled'))
