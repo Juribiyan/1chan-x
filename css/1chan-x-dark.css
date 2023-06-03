@@ -1,0 +1,256 @@
+@media (max-width: 1060px) {
+    .l-left-panel-wrap, 
+    .l-right-panel-wrap {
+        background-color: #000;
+        border-color: #444444;
+    }
+    .l-left-panel-wrap.x1-panel-shown, 
+    .l-right-panel-wrap.x1-panel-shown {
+        box-shadow: 0 0 40px #000000, 0 0 0 100vw #00000069;
+    }
+    .x1-panel-shown::after {
+        background-color: black;
+    }
+    .x1-panel-toggle-inmenu {
+        color: #a4a4a4;
+    }
+    .x1-panel-toggle-inmenu:hover {
+        color: #d2d2d2;
+    }
+    .x1-panel-toggle-inmenu::before {
+        box-shadow: 0 2px 0 transparent, 0 4px 0 currentColor, 0 6px 0 transparent, 0 8px 0 currentColor;
+    }
+    .x1-panel-toggle-inpanel {
+        color: #a4a4a4;
+    }
+    .x1-panel-toggle-inpanel:hover {
+        color: #d5d5d5;
+    }
+}
+
+@media (max-width: 700px) {
+    .b-blog-entry, .b-comment {
+        border: 1px solid #2d2d2d;
+        background-color: #1a1a1a;
+        border-bottom-color: #222;
+        border-top-color: #343434;
+    }
+    .b-comments-load span {
+        border-color: #444444;
+    }
+    .b-blog-entry .b-blog-entry_b-info {
+        background: linear-gradient(0deg, #0d0d0d, transparent);
+    }
+    .l-wrap.x1-state-news .l-content-wrap,
+    .l-wrap.x1-state-newsentry .l-content-wrap {
+        background: linear-gradient(180deg, transparent 0%, #000 150px, #000 calc(100% - 150px), transparent 100%);
+    }
+    .l-comments-wrap {
+        background-color: #241300;
+    }
+    .b-board .l-comments-wrap {
+        background: linear-gradient(180deg, #241300 0%, #241300a1 30px);
+    }
+    .b-comment {
+        border-color: #512d05 #371e03 #331b00;
+    }
+    .b-board .l-comments-wrap .b-comment:first-of-type::before {
+        border-top-color: #5f380c;
+    }
+    .b-board .l-comments-wrap .b-comment:last-of-type::after {
+        border-bottom: 1px solid rgb(53 28 0);
+    }
+    .b-comment.m-new {
+        background-color: #2d1800;
+        border-color: #643908;
+        box-shadow: 0 1px 2px #000000, inset 0 0 6px #ffffff2e;
+    }
+    .b-comment.m-selected {
+        box-shadow: 0 1px 2px #0003, inset 0 0 1px 2px #559be8;
+    }
+}
+
+@media (max-width: 350px) {
+    .b-header-block.m-mascot-news::before, 
+    .b-header-block.m-mascot-fav::before {
+        background-image: linear-gradient(180deg, #ffffff7d 0%, white 30%, #ffffff7d 100%);
+    }
+    .b-comment-form_b-upload label {
+        background: rgb(0 0 0 / 5%);
+        border-color: #888;
+    }
+    .b-comment-form_b-upload label::before {
+        color: #5e5e5e;
+    }
+}
+.b-comment.m-tip {
+    box-shadow: 0 3px 6px #00000052;
+}
+.x1-btn {
+    border-color: #585858;
+    color: #9b9b9b;
+}
+.x1-btn:hover {
+    border-color: #8f8f8f;
+    background-color: #ffffff29;
+    color: #d9d9d9;
+}
+.x1-btn-group .x1-btn:not(:hover) {
+    border-right-color: rgb(0 0 0 / 0.1);
+}
+.x1-xp-pane-switcher .x1-btn {
+    background-color: #000;
+}
+.x1-btn-group .x1-xp-switcher-selected {
+    border-color: rgb(255 255 255 / 40%)!important;
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 34%);
+    background-color: #001a38;
+    color: #ffffffb8;
+}
+.x1-btn-group .x1-btn:last-child:not(:hover) {
+    border-right-color: #585858;
+}
+.x1-xp-pane {
+    border-color: #333;
+}
+.x1-snippet-img:hover {
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 20%);
+    background: rgb(0 26 56);
+}
+.x1-floating-btn {
+    box-shadow: 0 2px 3px rgb(0 0 0 / 30%);
+}
+.x1-snippet-action:hover {
+    box-shadow: 0 2px 3px rgb(0 0 0 / 60%); 
+}
+.x1-snippet-delete {
+    background-color: #ff5252;
+}
+.x1-snippet-delete:hover {
+    background-color: #c60202; 
+}
+.x1-snippet-collapse,
+.x1-snippet-expand {
+    background-color: #8bb9eb;
+}
+.x1-snippet-collapse:hover,
+.x1-snippet-expand:hover {
+    background-color: #5c85b2; 
+}
+.x1-snippet-add,
+.x1-snippet-uncollapse {
+    background-color: #8ed84d;
+}
+.x1-snippet-add:hover,
+.x1-snippet-uncollapse:hover {
+    background-color: #71bb31;
+}
+.x1-snippet-delete::before,
+.x1-snippet-delete::after {
+    background-color: #fff;
+}
+.x1-snippet-expand::before,
+.x1-snippet-collapse::before,
+.x1-snippet-uncollapse::before {
+    border-color: white;
+}
+.x1-snippet-uncollapse::after {
+    background-color: #fff;
+}
+
+.x1-txt-snippet {
+    border-bottom-color: #9d9d9d;
+}
+.x1-txt-snippet:hover {
+    background-color: #001a38;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 20%);
+    border-bottom-color: transparent;
+}
+.x1-url-icon {
+    color: #3366cc;
+}
+.x1-btn:hover .x1-url-icon {
+    color: #ff5a00;
+}
+.x1-url-icon::before {
+    box-shadow: -1px 1px 0 1px #000;
+}
+.x1-insert-url:hover .x1-url-icon::before {
+    box-shadow: -1px 1px 0 1px #292929;
+}
+.x1-btn:hover .x1-url-icon::before {
+    background-color: #292929;
+}
+
+.x1-snippet-add::before,
+.x1-snippet-add::after{
+    background-color: #fff;
+}
+.x1-imglink-sus img:not(.x1-warning),
+.x1-imglink-sus video {
+    border-color: #ffad18;
+}
+.x1-unhide-post::before {
+    background-color: #888;
+    box-shadow: 0 1px 0 #000;
+}
+.b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-header a:link, 
+.b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-header a:visited {
+    color: #aaa;
+}
+
+.x1-label {
+    color: #fff;
+}
+.x1-label-succ {
+    background-color: #14ba14;
+}
+.x1-audio-content {
+    color: #306bad;
+}
+
+#x1-tts {
+    background: transparent;
+    color: inherit;
+    border-color: rgb(255 255 255 / 33%);
+}
+.x1-select:hover {
+    border-color: rgb(0 0 0 / .4);
+}
+#x1-tts option {
+    background: #000;
+}
+
+.b-post-added-notify,
+.b-post-added-notify a:link, .b-post-added-notify a:visited, .b-post-added-notify a:hover,
+.b-blog-form .b-blog-form_b-error {
+    color: #c7c7c7;
+}
+#captchaimage {
+    filter: invert(1) hue-rotate(.5turn)
+}
+.x1-transparent-btn {
+    
+}
+.x1-transparent-btn:hover,
+img[src*="favorites-false"]:hover,
+.js-delete-button:hover {
+    filter: brightness(1.5);
+}
+img[src*="favorites-false"],
+.js-delete-button {
+    filter: invert(1) brightness(1.5)
+}
+input[type=submit], input[type=button] {
+    border: 1px solid #585858;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+input[type=submit]:hover, input[type=button]:hover {
+    border-color: #8f8f8f;
+    background-color: #ffffff29;
+    color: #d9d9d9;
+}
+.g-input-error {
+    color: #fff;
+}

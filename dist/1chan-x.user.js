@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.3.1
+// @version      1.4.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -40,6 +40,9 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // @run-at       document-start
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
+
+// const cssBaseURL = `https://1chan-x/css/`      // dev
+var cssBaseURL = "https://juribiyan.github.io/1chan-x/css/"; // prod
 
 // ========================== General utilities and prototype extensions ==========================
 
@@ -243,7 +246,12 @@ var siteSpecific = {
         supported: ['imgur', 'catbox', 'generic']
       },
       css: "\n        .l-content-wrap {\n          border-radius: 23px 23px 8px 8px;\n        }\n      ",
-      features: ['voice']
+      features: ['voice'],
+      darkTheme: {
+        logo: {
+          src: '/img/ogol.png'
+        }
+      }
     },
     _1chan_ca: {
       imgSvc: {
@@ -251,19 +259,38 @@ var siteSpecific = {
         imgur: {
           key: ''
         }
+      },
+      darkTheme: {
+        logo: {
+          src: '/img/logo_omsk.png'
+        }
       }
     },
     _1chan_life: {
       imgSvc: {
         supported: ['imgur', 'catbox']
       },
-      css: "\n        .b-blog-panel_b-all span::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n      "
+      css: "\n        .b-blog-panel_b-all span::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n      ",
+      darkTheme: {
+        logo: {
+          src: false,
+          // Keep the default logo
+          css: "filter: invert(1) hue-rotate(200deg) brightness(2)"
+        }
+      }
     },
     _1chan_plus: {
       imgSvc: {
         supported: ['imgur', 'catbox']
       },
-      css: "\n        .b-blog-panel_b-all span::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n      "
+      css: "\n        .b-blog-panel_b-all span::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n      ",
+      darkTheme: {
+        logo: {
+          src: false,
+          // Keep the default logo
+          css: "filter: invert(1) hue-rotate(180deg) brightness(1.25)"
+        }
+      }
     },
     _1chan_top: {
       imgSvc: {
@@ -283,7 +310,17 @@ var siteSpecific = {
           }
         }
       },
-      css: "\n        .l-content-wrap {\n          border-radius: 23px 23px 8px 8px;\n        }\n        .b-blog-panel_b-all a::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n        .b-blog-panel ul {\n            display: flex;\n            width: calc(100% - 16px);\n        }\n      "
+      css: "\n        .l-content-wrap {\n          border-radius: 23px 23px 8px 8px;\n        }\n        .b-blog-panel_b-all a::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n        .b-blog-panel ul {\n            display: flex;\n            width: calc(100% - 16px);\n        }\n      ",
+      darkTheme: {
+        noService: true,
+        // Following a service link doesn't do shit
+        logo: {
+          src: false,
+          // Keep the default logo
+          css: "filter: invert(1) hue-rotate(325deg) brightness(1.25)"
+        }
+      },
+      normalLogoSrc: '/img/logo_top.png' // Yeah I'm sure it was absolutely necessary to break the consistency
     }
   }
 };
@@ -2053,7 +2090,7 @@ var settings = {
       console.warn('Unable to initialize settings');
       return;
     }
-    rp._ins('beforeend', "<center><button type=\"button\" id=\"x1-settings-open\" class=\"x1-btn\">1chan-X</button></center>", true).addEventListener('click', function () {
+    rp._ins('beforeend', "<center><button type=\"button\" id=\"x1-settings-open\" class=\"x1-btn\">1chan-X</button></center>", true)._$('button').addEventListener('click', function () {
       if (cw !== null && cw !== void 0 && cw.classList) {
         if (cw.classList.contains('x1-settings-enabled')) cw.classList.remove('x1-settings-enabled');else cw.classList.add('x1-settings-enabled');
       }
@@ -2122,22 +2159,88 @@ function fixMenuForTouch() {
     });
   }
 }
+var darkTheme = {
+  get isDark() {
+    if (typeof this._darkNow === 'undefined') {
+      this._darkNow = !!~document.querySelector('link[href*="production"]').href.indexOf('omsk');
+    }
+    return this._darkNow;
+  },
+  init: function init() {
+    var _siteSpecific$current4;
+    var currentSetting = (_siteSpecific$current4 = siteSpecific.current) === null || _siteSpecific$current4 === void 0 ? void 0 : _siteSpecific$current4.darkTheme;
+    if (currentSetting) {
+      var _currentSetting$logo, _currentSetting$logo2;
+      this.noService = currentSetting === null || currentSetting === void 0 ? void 0 : currentSetting.noService;
+      this.darkLogoSrc = currentSetting === null || currentSetting === void 0 ? void 0 : (_currentSetting$logo = currentSetting.logo) === null || _currentSetting$logo === void 0 ? void 0 : _currentSetting$logo.src;
+      this.darkLogoCSS = currentSetting === null || currentSetting === void 0 ? void 0 : (_currentSetting$logo2 = currentSetting.logo) === null || _currentSetting$logo2 === void 0 ? void 0 : _currentSetting$logo2.css;
+    }
+    if (this.noService) {
+      this.switchTheme(!!localStorage['useDarkTheme']);
+    }
+    document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-").concat(this.isDark ? 'dark' : 'normal', ".css\">"));
+  },
+  addSwitcher: function addSwitcher() {
+    var _this24 = this;
+    $('#x1-settings-open')._ins('afterend', "<a class=\"x1-theme-switcher\" href=\"/service/theme/".concat(this.isDark ? 'normal' : 'omsk', "\" title=\"\u041F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u0442\u0435\u043C\u0443\"></a>"), true).addEventListener('click', function (ev) {
+      ev.preventDefault();
+      _this24.handleThemeSwitch();
+    });
+  },
+  handleThemeSwitch: function handleThemeSwitch() {
+    var toDark = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : !this.isDark;
+    this.switchTheme(toDark);
+    this.fixLogo();
+    // Save the setting 
+    if (this.noService) {
+      // in case it's broken (looking at you 1chan.top)
+      localStorage['useDarkTheme'] = toDark ? 1 : '';
+    } else {
+      fetch("/service/theme/".concat(toDark ? 'omsk' : 'normal'), {
+        credentials: 'include'
+      });
+    }
+  },
+  switchTheme: function switchTheme(toDark) {
+    // Replace the production CSS
+    var prod = document.querySelector('link[href*="production"]');
+    prod.insertAdjacentHTML('afterend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/production".concat(toDark ? '-omsk' : '', ".css\" media=\"all\">"));
+    prod.remove();
+    // Replace the extension CSS
+    var user = document.querySelector("link[href*=\"1chan-x-".concat(toDark ? 'normal' : 'dark', "\"]"));
+    if (user) {
+      user.insertAdjacentHTML('afterend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-").concat(toDark ? 'dark' : 'normal', ".css\">"));
+      user.remove();
+    }
+    this._darkNow = toDark;
+  },
+  fixLogo: function fixLogo() {
+    var _siteSpecific$current5;
+    var isDark = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.isDark;
+    // Replace the logo
+    var logo = $('.b-header-block_b-logotype a img');
+    logo.src = isDark && this.darkLogoSrc ? this.darkLogoSrc : ((_siteSpecific$current5 = siteSpecific.current) === null || _siteSpecific$current5 === void 0 ? void 0 : _siteSpecific$current5.normalLogoSrc) || '/img/logo.png';
+    if (this.darkLogoCSS) {
+      if (isDark) injector.inject('x1-dark-logo', ".b-header-block_b-logotype a img { ".concat(this.darkLogoCSS, " }"));else injector.remove('x1-dark-logo');
+    }
+  }
+}
 
 // ============================================= Main =============================================
+;
 
 (function () {
   var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee21() {
-    var cssURL;
     return _regeneratorRuntime().wrap(function _callee21$(_context22) {
       while (1) switch (_context22.prev = _context22.next) {
         case 0:
           // Add CSS
-          cssURL = "https://juribiyan.github.io/1chan-x/css/1chan-x.css";
-          document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssURL, "\">"));
+          document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-base.css\">"));
 
           // Add viewport
           document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1\">");
           siteSpecific.init();
+          darkTheme.init();
           document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20() {
             var state, val;
             return _regeneratorRuntime().wrap(function _callee20$(_context21) {
@@ -2161,13 +2264,16 @@ function fixMenuForTouch() {
                 case 8:
                   setupPanels();
                   fixMenuForTouch();
+                  darkTheme.fixLogo();
+                  // Add theme switcher
+                  darkTheme.addSwitcher();
 
                   // Easter egg
-                  val = $('a[href^="https://validator.w3.org"]');
+                  val = $('a[href*="validator.w3.org"]');
                   if (val) {
                     val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
                   }
-                case 12:
+                case 14:
                 case "end":
                   return _context21.stop();
               }

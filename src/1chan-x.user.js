@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.3.1
+// @version      1.4.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -22,6 +22,9 @@
 // @run-at       document-start
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
+
+// const cssBaseURL = `https://1chan-x/css/`      // dev
+const cssBaseURL = `https://juribiyan.github.io/1chan-x/css/` // prod
 
 // ========================== General utilities and prototype extensions ==========================
 
@@ -210,12 +213,22 @@ const siteSpecific = {
           border-radius: 23px 23px 8px 8px;
         }
       `,
-      features: ['voice']
+      features: ['voice'],
+      darkTheme: {
+        logo: {
+          src: '/img/ogol.png'
+        }
+      }
     },
     _1chan_ca: {
       imgSvc: {
         supported: ['imgur'],
         imgur: { key: '' }
+      },
+      darkTheme: {
+        logo: {
+          src: '/img/logo_omsk.png'
+        }
       }
     },
     _1chan_life: {
@@ -230,7 +243,13 @@ const siteSpecific = {
           margin-right: 6px;
           background-image: url(/ico/favorites-false.png);
         }
-      `
+      `,
+      darkTheme: {
+        logo: {
+          src: false, // Keep the default logo
+          css: `filter: invert(1) hue-rotate(200deg) brightness(2)`
+        }
+      }
     },
     _1chan_plus: {
       imgSvc: {supported: ['imgur', 'catbox']},
@@ -244,7 +263,13 @@ const siteSpecific = {
           margin-right: 6px;
           background-image: url(/ico/favorites-false.png);
         }
-      `
+      `,
+      darkTheme: {
+        logo: {
+          src: false, // Keep the default logo
+          css: `filter: invert(1) hue-rotate(180deg) brightness(1.25)`
+        }
+      }
     },
     _1chan_top: {
       imgSvc: {
@@ -284,7 +309,15 @@ const siteSpecific = {
             display: flex;
             width: calc(100% - 16px);
         }
-      `
+      `,
+      darkTheme: {
+        noService: true, // Following a service link doesn't do shit
+        logo: {
+          src: false, // Keep the default logo
+          css: `filter: invert(1) hue-rotate(325deg) brightness(1.25)`
+        }
+      },
+      normalLogoSrc: '/img/logo_top.png' // Yeah I'm sure it was absolutely necessary to break the consistency
     }
   }
 }
@@ -1585,7 +1618,7 @@ const settings = {
     }
     rp._ins('beforeend', 
       `<center><button type="button" id="x1-settings-open" class="x1-btn">1chan-X</button></center>`
-    , true).addEventListener('click', () => {
+    , true)._$('button').addEventListener('click', () => {
       if (cw?.classList) {
         if(cw.classList.contains('x1-settings-enabled'))
           cw.classList.remove('x1-settings-enabled')
@@ -1673,19 +1706,86 @@ function fixMenuForTouch() {
   }
 }
 
+const darkTheme = {
+  get isDark() {
+    if (typeof this._darkNow === 'undefined') {
+      this._darkNow = !!~document.querySelector('link[href*="production"]').href.indexOf('omsk')
+    }
+    return this._darkNow
+  },
+  init: function() {
+    let currentSetting = siteSpecific.current?.darkTheme
+    if (currentSetting) {
+      this.noService = currentSetting?.noService
+      this.darkLogoSrc = currentSetting?.logo?.src
+      this.darkLogoCSS = currentSetting?.logo?.css
+    }
+    if (this.noService) {
+      this.switchTheme(!!localStorage['useDarkTheme'])
+    }
+    document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssBaseURL}/1chan-x-${this.isDark ? 'dark' : 'normal'}.css">`)
+  },
+  addSwitcher: function() {
+    $('#x1-settings-open')._ins('afterend', 
+      `<a class="x1-theme-switcher" href="/service/theme/${this.isDark ? 'normal' : 'omsk'}" title="Переключить тему"></a>`, true)
+    .addEventListener('click', ev => {
+      ev.preventDefault()
+      this.handleThemeSwitch()
+    })
+  },
+  handleThemeSwitch: function(toDark=!this.isDark) {
+    this.switchTheme(toDark)
+    this.fixLogo()
+    // Save the setting 
+    if (this.noService) { // in case it's broken (looking at you 1chan.top)
+      localStorage['useDarkTheme'] = toDark ? 1 : ''
+    }
+    else {
+      fetch(`/service/theme/${toDark ? 'omsk' : 'normal'}`, {
+        credentials: 'include'
+      })
+    }
+  },
+  switchTheme: function(toDark) {
+    // Replace the production CSS
+    let prod = document.querySelector('link[href*="production"]')
+    prod.insertAdjacentHTML('afterend', `<link rel="stylesheet" type="text/css" href="/css/production${toDark ? '-omsk' : ''}.css" media="all">`)
+    prod.remove()
+    // Replace the extension CSS
+    let user = document.querySelector(`link[href*="1chan-x-${toDark ? 'normal' : 'dark'}"]`)
+    if (user) {
+      user.insertAdjacentHTML('afterend', `<link rel="stylesheet" type="text/css" href="${cssBaseURL}/1chan-x-${toDark ? 'dark' : 'normal'}.css">`)
+      user.remove()
+    }
+    this._darkNow = toDark
+  },
+  fixLogo: function(isDark=this.isDark) {
+    // Replace the logo
+    let logo = $('.b-header-block_b-logotype a img')
+    logo.src = (isDark && this.darkLogoSrc) ? this.darkLogoSrc : (siteSpecific.current?.normalLogoSrc || '/img/logo.png')
+    if (this.darkLogoCSS) {
+      if (isDark)
+        injector.inject('x1-dark-logo', `.b-header-block_b-logotype a img { ${this.darkLogoCSS} }`)
+      else 
+        injector.remove('x1-dark-logo')
+    }
+  }
+}
+
 
 // ============================================= Main =============================================
 
-(async function main() {
+;(async function main() {
   // Add CSS
-  let cssURL = `https://juribiyan.github.io/1chan-x/css/1chan-x.css`
-  document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssURL}">`)
+  document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssBaseURL}/1chan-x-base.css">`)
 
   // Add viewport
   document.head.insertAdjacentHTML('afterbegin',
     `<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1">`)
 
   siteSpecific.init()
+
+  darkTheme.init()
 
   document.addEventListener('DOMContentLoaded', async () => {
     settings.init()
@@ -1704,8 +1804,12 @@ function fixMenuForTouch() {
 
     fixMenuForTouch()
 
+    darkTheme.fixLogo()
+    // Add theme switcher
+    darkTheme.addSwitcher()
+
     // Easter egg
-    let val = $('a[href^="https://validator.w3.org"]')
+    let val = $('a[href*="validator.w3.org"]')
     if (val) {
       val._ins('beforeend', `<img class="smiley" src="/img/makak.gif">`)
     }

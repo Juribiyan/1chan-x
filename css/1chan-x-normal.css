@@ -1,0 +1,216 @@
+@media (max-width: 1060px) {
+    .l-left-panel-wrap, 
+    .l-right-panel-wrap {
+        background-color: #fff;
+        border-color: #bbbbbb;
+    }
+    .l-left-panel-wrap.x1-panel-shown, 
+    .l-right-panel-wrap.x1-panel-shown {
+        box-shadow: 0 0 40px #bbbbbb, 0 0 0 100vw #0000000d;
+    }
+    .x1-panel-shown::after {
+        background-color: white;
+    }
+    .x1-panel-toggle-inmenu {
+        color: #7f7f7f;
+    }
+    .x1-panel-toggle-inmenu:hover {
+        color: #000;
+    }
+    .x1-panel-toggle-inmenu::before {
+        box-shadow: 0 2px 0 transparent, 0 4px 0 currentColor, 0 6px 0 transparent, 0 8px 0 currentColor;
+    }
+    .x1-panel-toggle-inpanel {
+        color: #999999;
+    }
+    .x1-panel-toggle-inpanel:hover {
+        color: #333;
+    }
+}
+
+@media (max-width: 700px) {
+    .b-blog-entry, .b-comment {
+        border: 1px solid #0004;
+        border-top-color: #0003;
+        border-bottom-color: #0005;
+        box-shadow: 0 1px 2px #0003;
+        background-color: #fff;
+    }
+    .b-comments-load span {
+        border-color: #cccccc;
+    }
+    .b-blog-entry .b-blog-entry_b-info {
+        background: linear-gradient(0deg, #f4f4f4, transparent);
+    }
+    .l-wrap.x1-state-news .l-content-wrap,
+    .l-wrap.x1-state-newsentry .l-content-wrap {
+        background: linear-gradient(180deg, transparent 0%, #f7f7f7 150px, #f7f7f7 calc(100% - 150px), transparent 100%);
+    }
+    .l-comments-wrap {
+        background-color: #eaf4ff;
+    }
+    .b-board .l-comments-wrap {
+        border-bottom-color: #a1c1e3;
+        background: linear-gradient(180deg, #fff 0%, #ffffffa1 30px);
+    }
+    .b-comment {
+        border-color: #c2d7ec #a1bcda #77ace6;
+    }
+    .b-board .l-comments-wrap .b-comment:first-of-type::before {
+        border-top-color: #ccc;
+    }
+    .b-board .l-comments-wrap .b-comment:last-of-type::after {
+        border-bottom: 1px solid rgb(44 90 139 / 40%);
+    }
+    .b-comment.m-new {
+        background-color: #fff;
+        border-color: #5baaff;
+        box-shadow: 0 1px 2px #5f87b3, inset 0 0 6px #5baaff2e;
+    }
+    .l-comments-wrap .b-comment-form {
+        background-color: #f7fbff;
+    }
+    .b-comment.m-selected {
+        box-shadow: 0 1px 2px #0003, inset 0 0 1px 2px #559be8;
+    }
+}
+
+@media (max-width: 350px) {
+    .b-header-block.m-mascot-news::before, 
+    .b-header-block.m-mascot-fav::before {
+        background-image: linear-gradient(180deg, #ffffff7d 0%, white 30%, #ffffff7d 100%);
+    }
+    .b-comment-form_b-upload label {
+        background: rgb(0 0 0 / 5%);
+        border-color: #888;
+    }
+    .b-comment-form_b-upload label::before {
+        color: #5e5e5e;
+    }
+}
+.b-comment.m-tip {
+    box-shadow: 0 3px 6px #00000052;
+}
+.x1-btn {
+    border-color: rgb(0 0 0 / 0.2);
+}
+.x1-btn:hover {
+    border-color: rgb(0 0 0 / .4);
+    background-color: #fff;
+}
+.x1-btn-group .x1-btn:not(:hover) {
+    border-right-color: rgb(0 0 0 / 0.1);
+}
+.x1-xp-pane-switcher .x1-btn {
+    background-color: #fff;
+}
+.x1-btn-group .x1-xp-switcher-selected {
+    border-color: rgb(0 0 0 / 0.4)!important;
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 34%);
+    background-color: #eee;
+}
+.x1-btn-group .x1-btn:last-child:not(:hover) {
+    border-right-color: rgb(0 0 0 / 0.2);
+}
+.x1-xp-pane {
+    border-color: #ccc;
+}
+.x1-snippet-img:hover {
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 20%);
+    background: rgb(255 255 255 / 0.5);
+}
+.x1-floating-btn {
+    box-shadow: 0 2px 3px rgb(0 0 0 / 30%);
+}
+.x1-snippet-action:hover {
+    box-shadow: 0 2px 3px rgb(0 0 0 / 60%); 
+}
+.x1-snippet-delete {
+    background-color: #ff5252;
+}
+.x1-snippet-delete:hover {
+    background-color: #c60202; 
+}
+.x1-snippet-collapse,
+.x1-snippet-expand {
+    background-color: #8bb9eb;
+}
+.x1-snippet-collapse:hover,
+.x1-snippet-expand:hover {
+    background-color: #5c85b2; 
+}
+.x1-snippet-add,
+.x1-snippet-uncollapse {
+    background-color: #8ed84d;
+}
+.x1-snippet-add:hover,
+.x1-snippet-uncollapse:hover {
+    background-color: #71bb31;
+}
+.x1-snippet-delete::before,
+.x1-snippet-delete::after {
+    background-color: #fff;
+}
+.x1-snippet-expand::before,
+.x1-snippet-collapse::before,
+.x1-snippet-uncollapse::before {
+    border-color: white;
+}
+.x1-snippet-uncollapse::after {
+    background-color: #fff;
+}
+
+.x1-txt-snippet {
+    border-bottom-color: #9d9d9d;
+}
+.x1-txt-snippet:hover {
+    background-color: #fcfcfc;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 20%);
+    border-bottom-color: transparent;
+}
+.x1-url-icon {
+    color: #3366cc;
+}
+.x1-btn:hover .x1-url-icon {
+    color: #ff5a00;
+}
+.x1-url-icon::before {
+    box-shadow: -1px 1px 0 1px white;
+}
+.x1-btn:hover .x1-url-icon::before {
+    background-color: #fff;
+}
+
+.x1-snippet-add::before,
+.x1-snippet-add::after{
+    background-color: #fff;
+}
+.x1-imglink-sus img:not(.x1-warning),
+.x1-imglink-sus video {
+    border-color: #ffad18;
+}
+.x1-unhide-post::before {
+    background-color: #b8b9ba;
+    box-shadow: 0 1px 0 white;
+}
+.b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-header a:link, 
+.b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-header a:visited {
+    color: #aaa;
+}
+
+.x1-label {
+    color: #fff;
+}
+.x1-label-succ {
+    background-color: #14ba14;
+}
+.x1-audio-content {
+    color: #306bad;
+}
+
+#x1-tts {
+    border-color: rgb(0 0 0 / 0.2);
+}
+.x1-select:hover {
+    border-color: rgb(0 0 0 / .4);
+}
