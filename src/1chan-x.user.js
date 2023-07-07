@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.4.0
+// @version      1.4.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1134,7 +1134,7 @@ const formAugmentation = {
       let service = Object.assign(this.defaultImageServices[svc], siteSpecific.current.imgSvc?.[svc] || {})
       // Named image service expressions
       if (service.key !== false) {
-        service.reverseExp = new RegExp(`^\\[${service.key}\\:([^\\s\\/\\:]+)\\:`, 'i')
+        service.reverseExp = new RegExp(`^\\[${service.key}\\:([^\\s\\/\\:]+)\\:\\]`, 'i')
       }
       // Unnamed image services with a list of hosts
       else if (service.supportedHosts) {
@@ -1272,8 +1272,8 @@ const formAugmentation = {
     // Check if selected text is actually an image code (will not match if text contains any extra characters)
     let imgFound = false
     for (let svc in this.imageServices) {
-      let match = txt.match(this.imageServices[svc].reverseExp)
-      if (match) {
+      let match = txt.trim().match(this.imageServices[svc].reverseExp)
+      if (match && match[0]==txt.trim()) {
         let code = match[1]
         if (this.imageServices[svc].getCompactCode)
           code = this.imageServices[svc].getCompactCode(code)
