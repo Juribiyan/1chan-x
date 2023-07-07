@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.0
+// @version      1.5.2
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -908,7 +908,7 @@ var comments = {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
             _context8.next = 2;
-            return fetch("/news/res/".concat(post, "/"));
+            return fetch(document.location.origin + "/news/res/".concat(post, "/"));
           case 2:
             res = _context8.sent;
             if (res !== null && res !== void 0 && res.ok) {
@@ -2196,7 +2196,7 @@ var darkTheme = {
       // in case it's broken (looking at you 1chan.top)
       localStorage['useDarkTheme'] = toDark ? 1 : '';
     } else {
-      fetch("/service/theme/".concat(toDark ? 'omsk' : 'normal'), {
+      fetch(document.location.origin + "/service/theme/".concat(toDark ? 'omsk' : 'normal'), {
         credentials: 'include'
       });
     }
@@ -2238,11 +2238,18 @@ var quickScroll = {
     this.update();
   },
   scroll: function scroll() {
+    var newPosition = 0;
     if (window.scrollY == 0) {
-      window.scrollTo(0, this.savedPosition || document.body.scrollHeight);
+      newPosition = this.savedPosition || document.body.scrollHeight;
     } else {
       this.savedPosition = window.scrollY;
-      window.scrollTo(0, 0);
+    }
+    try {
+      unsafeWindow.jQuery('html').animate({
+        scrollTop: newPosition
+      }, 100);
+    } catch (e) {
+      window.scrollTo(0, newPosition);
     }
   },
   update: function update() {

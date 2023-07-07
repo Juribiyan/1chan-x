@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.1
+// @version      1.5.2
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1780,12 +1780,20 @@ const quickScroll = {
     this.update()
   },
   scroll: function() {
+    let newPosition = 0
     if (window.scrollY == 0) {
-      window.scrollTo(0, this.savedPosition || document.body.scrollHeight)
+      newPosition = this.savedPosition || document.body.scrollHeight
     }
     else {
       this.savedPosition = window.scrollY
-      window.scrollTo(0, 0)
+    }
+    try {
+      unsafeWindow.jQuery('html').animate({
+        scrollTop: newPosition
+      }, 100);
+    }
+    catch(e) {
+      window.scrollTo(0, newPosition)
     }
   },
   update: function() {
