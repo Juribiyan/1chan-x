@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.4.1
+// @version      1.5.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -23,8 +23,8 @@
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
 
-// const cssBaseURL = `https://1chan-x/css/`      // dev
-const cssBaseURL = `https://juribiyan.github.io/1chan-x/css/` // prod
+// const cssBaseURL = `https://1chan-x/css`      // dev
+const cssBaseURL = `https://juribiyan.github.io/1chan-x/css` // prod
 
 // ========================== General utilities and prototype extensions ==========================
 
@@ -1772,6 +1772,30 @@ const darkTheme = {
   }
 }
 
+const quickScroll = {
+  init: function() {
+    this.e = document.body._ins('afterbegin', `<div id="x1-quick-scroll"><div>↓</div></div>`, true)
+    this.e.addEventListener('click', () => this.scroll())
+    window.addEventListener('scroll', () => this.update())
+    this.update()
+  },
+  scroll: function() {
+    if (window.scrollY == 0) {
+      window.scrollTo(0, this.savedPosition || document.body.scrollHeight)
+    }
+    else {
+      this.savedPosition = window.scrollY
+      window.scrollTo(0, 0)
+    }
+  },
+  update: function() {
+    if (window.scrollY != 0)
+      this.e.classList.add('x1-qs-up')
+    else
+      this.e.classList.remove('x1-qs-up')
+  }
+}
+
 
 // ============================================= Main =============================================
 
@@ -1807,6 +1831,9 @@ const darkTheme = {
     darkTheme.fixLogo()
     // Add theme switcher
     darkTheme.addSwitcher()
+
+    // Add quick scroll-up
+    quickScroll.init()
 
     // Easter egg
     let val = $('a[href*="validator.w3.org"]')

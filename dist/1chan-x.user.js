@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.4.0
+// @version      1.5.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -41,8 +41,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
 
-// const cssBaseURL = `https://1chan-x/css/`      // dev
-var cssBaseURL = "https://juribiyan.github.io/1chan-x/css/"; // prod
+// const cssBaseURL = `https://1chan-x/css`      // dev
+var cssBaseURL = "https://juribiyan.github.io/1chan-x/css"; // prod
 
 // ========================== General utilities and prototype extensions ==========================
 
@@ -1426,7 +1426,7 @@ var formAugmentation = {
               var service = Object.assign(_this15.defaultImageServices[svc], ((_siteSpecific$current3 = siteSpecific.current.imgSvc) === null || _siteSpecific$current3 === void 0 ? void 0 : _siteSpecific$current3[svc]) || {});
               // Named image service expressions
               if (service.key !== false) {
-                service.reverseExp = new RegExp("^\\[".concat(service.key, "\\:([^\\s\\/\\:]+)\\:"), 'i');
+                service.reverseExp = new RegExp("^\\[".concat(service.key, "\\:([^\\s\\/\\:]+)\\:\\]"), 'i');
               }
               // Unnamed image services with a list of hosts
               else if (service.supportedHosts) {
@@ -1632,8 +1632,8 @@ var formAugmentation = {
     // Check if selected text is actually an image code (will not match if text contains any extra characters)
     var imgFound = false;
     for (var svc in this.imageServices) {
-      var match = txt.match(this.imageServices[svc].reverseExp);
-      if (match) {
+      var match = txt.trim().match(this.imageServices[svc].reverseExp);
+      if (match && match[0] == txt.trim()) {
         var code = match[1];
         if (this.imageServices[svc].getCompactCode) code = this.imageServices[svc].getCompactCode(code);
         this.addImageSnippet({
@@ -2224,6 +2224,30 @@ var darkTheme = {
       if (isDark) injector.inject('x1-dark-logo', ".b-header-block_b-logotype a img { ".concat(this.darkLogoCSS, " }"));else injector.remove('x1-dark-logo');
     }
   }
+};
+var quickScroll = {
+  init: function init() {
+    var _this25 = this;
+    this.e = document.body._ins('afterbegin', "<div id=\"x1-quick-scroll\"><div>\u2193</div></div>", true);
+    this.e.addEventListener('click', function () {
+      return _this25.scroll();
+    });
+    window.addEventListener('scroll', function () {
+      return _this25.update();
+    });
+    this.update();
+  },
+  scroll: function scroll() {
+    if (window.scrollY == 0) {
+      window.scrollTo(0, this.savedPosition || document.body.scrollHeight);
+    } else {
+      this.savedPosition = window.scrollY;
+      window.scrollTo(0, 0);
+    }
+  },
+  update: function update() {
+    if (window.scrollY != 0) this.e.classList.add('x1-qs-up');else this.e.classList.remove('x1-qs-up');
+  }
 }
 
 // ============================================= Main =============================================
@@ -2268,12 +2292,15 @@ var darkTheme = {
                   // Add theme switcher
                   darkTheme.addSwitcher();
 
+                  // Add quick scroll-up
+                  quickScroll.init();
+
                   // Easter egg
                   val = $('a[href*="validator.w3.org"]');
                   if (val) {
                     val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
                   }
-                case 14:
+                case 15:
                 case "end":
                   return _context21.stop();
               }

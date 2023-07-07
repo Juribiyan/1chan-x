@@ -214,3 +214,6 @@
 .x1-select:hover {
     border-color: rgb(0 0 0 / .4);
 }
+#x1-quick-scroll:hover {
+    background: #0000000a;
+}

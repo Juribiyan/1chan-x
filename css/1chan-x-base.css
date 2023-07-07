@@ -1200,3 +1200,33 @@ audio, .x1-audio-content {
 .x1-btn:hover .b-spoiler-text {
     color: #9b9b9b!important;
 }
+#x1-quick-scroll {
+    background: transparent;
+    height: 100vh;
+    width: 100px;
+    position: fixed;
+    cursor: pointer;
+    font-size: 42px;
+    display: none;
+    align-content: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    transition: background-color .1s;
+    font-family: monospace;
+}
+#x1-quick-scroll div {
+    opacity: .5;
+    transition: opacity .1s, transform .2s;
+    user-select: none;
+}
+#x1-quick-scroll:hover div {
+    opacity: 1;
+}
+@media (min-width: 700px) {
+    #x1-quick-scroll {
+        display: flex;
+    }
+}
+.x1-qs-up div {
+    transform: scale(1, -1);
+}

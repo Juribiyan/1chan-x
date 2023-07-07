@@ -260,3 +260,6 @@ input, textarea {
 .b-live-entry .b-live-entry_b-clicks {
     color: #888;
 }
+#x1-quick-scroll:hover {
+    background: #ffffff1c;
+}
