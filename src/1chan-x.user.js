@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.0
+// @version      1.5.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -772,7 +772,7 @@ const comments = {
     }, {capture: true})
   },
   getLastComment: async function(post) {
-    let res = await fetch(`/news/res/${post}/`)
+    let res = await fetch(document.location.origin + `/news/res/${post}/`)
     if (!res?.ok) return false;
     let html = await res.text()
     if (!html) return false;
@@ -1741,7 +1741,7 @@ const darkTheme = {
       localStorage['useDarkTheme'] = toDark ? 1 : ''
     }
     else {
-      fetch(`/service/theme/${toDark ? 'omsk' : 'normal'}`, {
+      fetch(document.location.origin + `/service/theme/${toDark ? 'omsk' : 'normal'}`, {
         credentials: 'include'
       })
     }
