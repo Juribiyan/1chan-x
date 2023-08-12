@@ -576,6 +576,10 @@
     border-radius: 3px;
     min-height: 21px;
     vertical-align: middle;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 .x1-btn:hover {
     z-index: 1;
