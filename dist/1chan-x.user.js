@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.2
+// @version      1.5.3
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -37,7 +37,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // @grant        GM.setValue
 // @grant        GM.getValue
 // @grant        GM.deleteValue
-// @run-at       document-start
+// @run-at       document-end
 // @icon         https://juribiyan.github.io/1chan-x/icon.png
 // ==/UserScript==
 
