@@ -19,7 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.3
+// @version      1.5.4
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -200,34 +200,34 @@ function GM_getJSON(_x2) {
   return _GM_getJSON.apply(this, arguments);
 } // ======================================== Site settings =========================================
 function _GM_getJSON() {
-  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee22(key) {
+  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee21(key) {
     var v, data;
-    return _regeneratorRuntime().wrap(function _callee22$(_context23) {
-      while (1) switch (_context23.prev = _context23.next) {
+    return _regeneratorRuntime().wrap(function _callee21$(_context22) {
+      while (1) switch (_context22.prev = _context22.next) {
         case 0:
-          _context23.next = 2;
+          _context22.next = 2;
           return GM.getValue(key);
         case 2:
-          v = _context23.sent;
+          v = _context22.sent;
           if (v) {
-            _context23.next = 5;
+            _context22.next = 5;
             break;
           }
-          return _context23.abrupt("return", null);
+          return _context22.abrupt("return", null);
         case 5:
-          _context23.prev = 5;
+          _context22.prev = 5;
           data = JSON.parse(v);
-          return _context23.abrupt("return", data);
+          return _context22.abrupt("return", data);
         case 10:
-          _context23.prev = 10;
-          _context23.t0 = _context23["catch"](5);
+          _context22.prev = 10;
+          _context22.t0 = _context22["catch"](5);
           GM.deleteValue(key);
           console.warn("Deleted \"".concat(key, "\" from GM storage due to wrong format"));
         case 14:
         case "end":
-          return _context23.stop();
+          return _context22.stop();
       }
-    }, _callee22, null, [[5, 10]]);
+    }, _callee21, null, [[5, 10]]);
   }));
   return _GM_getJSON.apply(this, arguments);
 }
@@ -2255,15 +2255,61 @@ var quickScroll = {
   update: function update() {
     if (window.scrollY != 0) this.e.classList.add('x1-qs-up');else this.e.classList.remove('x1-qs-up');
   }
-}
+};
 
 // ============================================= Main =============================================
-;
+function initAll() {
+  return _initAll.apply(this, arguments);
+}
+function _initAll() {
+  _initAll = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee22() {
+    var state, val;
+    return _regeneratorRuntime().wrap(function _callee22$(_context23) {
+      while (1) switch (_context23.prev = _context23.next) {
+        case 0:
+          settings.init();
+          _context23.next = 3;
+          return hiddenItems.init();
+        case 3:
+          state = determineState();
+          if (state) {
+            app.state = state;
+            $('.l-wrap').classList.add("x1-state-".concat(state));
+          }
+          if (!(stateHandlers !== null && stateHandlers !== void 0 && stateHandlers[state])) {
+            _context23.next = 8;
+            break;
+          }
+          _context23.next = 8;
+          return stateHandlers[state]();
+        case 8:
+          setupPanels();
+          fixMenuForTouch();
+          darkTheme.fixLogo();
+          // Add theme switcher
+          darkTheme.addSwitcher();
 
+          // Add quick scroll-up
+          quickScroll.init();
+
+          // Easter egg
+          val = $('a[href*="validator.w3.org"]');
+          if (val) {
+            val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
+          }
+        case 15:
+        case "end":
+          return _context23.stop();
+      }
+    }, _callee22);
+  }));
+  return _initAll.apply(this, arguments);
+}
+;
 (function () {
-  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee21() {
-    return _regeneratorRuntime().wrap(function _callee21$(_context22) {
-      while (1) switch (_context22.prev = _context22.next) {
+  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20() {
+    return _regeneratorRuntime().wrap(function _callee20$(_context21) {
+      while (1) switch (_context21.prev = _context21.next) {
         case 0:
           // Add CSS
           document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-base.css\">"));
@@ -2272,52 +2318,16 @@ var quickScroll = {
           document.head.insertAdjacentHTML('afterbegin', "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1\">");
           siteSpecific.init();
           darkTheme.init();
-          document.addEventListener('DOMContentLoaded', /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20() {
-            var state, val;
-            return _regeneratorRuntime().wrap(function _callee20$(_context21) {
-              while (1) switch (_context21.prev = _context21.next) {
-                case 0:
-                  settings.init();
-                  _context21.next = 3;
-                  return hiddenItems.init();
-                case 3:
-                  state = determineState();
-                  if (state) {
-                    app.state = state;
-                    $('.l-wrap').classList.add("x1-state-".concat(state));
-                  }
-                  if (!(stateHandlers !== null && stateHandlers !== void 0 && stateHandlers[state])) {
-                    _context21.next = 8;
-                    break;
-                  }
-                  _context21.next = 8;
-                  return stateHandlers[state]();
-                case 8:
-                  setupPanels();
-                  fixMenuForTouch();
-                  darkTheme.fixLogo();
-                  // Add theme switcher
-                  darkTheme.addSwitcher();
-
-                  // Add quick scroll-up
-                  quickScroll.init();
-
-                  // Easter egg
-                  val = $('a[href*="validator.w3.org"]');
-                  if (val) {
-                    val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
-                  }
-                case 15:
-                case "end":
-                  return _context21.stop();
-              }
-            }, _callee20);
-          })));
+          if (document.readyState == "complete" || document.readyState == "loaded" || document.readyState == "interactive") {
+            initAll();
+          } else {
+            document.addEventListener('DOMContentLoaded', initAll);
+          }
         case 5:
         case "end":
-          return _context22.stop();
+          return _context21.stop();
       }
-    }, _callee21);
+    }, _callee20);
   }));
   function main() {
     return _main.apply(this, arguments);

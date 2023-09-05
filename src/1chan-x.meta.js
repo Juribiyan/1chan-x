@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.3
+// @version      1.5.4
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js

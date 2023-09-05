@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.3
+// @version      1.5.4
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1807,6 +1807,37 @@ const quickScroll = {
 
 // ============================================= Main =============================================
 
+async function initAll() {
+  settings.init()
+  await hiddenItems.init()
+
+  let state = determineState()
+  if (state) {
+    app.state = state
+    $('.l-wrap').classList.add(`x1-state-${state}`)
+  }
+  if (stateHandlers?.[state]) {
+    await stateHandlers[state]()
+  }
+
+  setupPanels()
+
+  fixMenuForTouch()
+
+  darkTheme.fixLogo()
+  // Add theme switcher
+  darkTheme.addSwitcher()
+
+  // Add quick scroll-up
+  quickScroll.init()
+
+  // Easter egg
+  let val = $('a[href*="validator.w3.org"]')
+  if (val) {
+    val._ins('beforeend', `<img class="smiley" src="/img/makak.gif">`)
+  }
+}
+
 ;(async function main() {
   // Add CSS
   document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssBaseURL}/1chan-x-base.css">`)
@@ -1819,34 +1850,10 @@ const quickScroll = {
 
   darkTheme.init()
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    settings.init()
-    await hiddenItems.init()
-
-    let state = determineState()
-    if (state) {
-      app.state = state
-      $('.l-wrap').classList.add(`x1-state-${state}`)
-    }
-    if (stateHandlers?.[state]) {
-      await stateHandlers[state]()
-    }
-
-    setupPanels()
-
-    fixMenuForTouch()
-
-    darkTheme.fixLogo()
-    // Add theme switcher
-    darkTheme.addSwitcher()
-
-    // Add quick scroll-up
-    quickScroll.init()
-
-    // Easter egg
-    let val = $('a[href*="validator.w3.org"]')
-    if (val) {
-      val._ins('beforeend', `<img class="smiley" src="/img/makak.gif">`)
-    }
-  })
+  if (document.readyState == "complete" || document.readyState == "loaded" || document.readyState == "interactive") {
+    initAll()
+  }
+  else {
+    document.addEventListener('DOMContentLoaded', initAll)
+  }
 })() // Always last
