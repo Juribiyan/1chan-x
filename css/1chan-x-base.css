@@ -1234,3 +1234,10 @@ audio, .x1-audio-content {
 .x1-qs-up div {
     transform: scale(1, -1);
 }
+.x1-hiddenpost-charcount {
+    display: none;
+    font-size: .7em;
+}
+.x1-hidden-by-text .x1-hiddenpost-charcount {
+    display: inline;
+}

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.5.4
+// @version      1.6.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1565,6 +1565,12 @@ const hiddenItems = {
     for (let exp of this.regExps) {
       if ((exp.test(txt) || (header && exp.test(header))) && !isUnhidden) {
         post.classList.add('x1-post-hidden', 'x1-hidden-by-text')
+        console.log(post)
+        if (!  post._$('.x1-hiddenpost-charcount')) {
+          let header = post._$('.b-comment_b-info') || post._$('.b-blog-entry_b-header')
+          if (header)
+            header._ins('beforeend', `<i class="x1-hiddenpost-charcount">(${txt.length} зн.)</i>`)
+        }
         if (skipImg)
           return true
       }
@@ -1586,7 +1592,6 @@ const hiddenItems = {
       if (this.isImgHidden(link, hideByImg, hideByLink) && !isUnhidden)
         post.classList.add('x1-post-hidden', 'x1-hidden-by-image')
     }
-    
   },
   isImgHidden: function(link, hideByImg, hideByLink) {
     let toHide = false
