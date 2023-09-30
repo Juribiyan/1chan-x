@@ -2,6 +2,9 @@
 
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
 var _this3 = void 0;
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
@@ -19,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.6.0
+// @version      1.7.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -43,6 +46,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 // const cssBaseURL = `https://1chan-x/css`      // dev
 var cssBaseURL = "https://juribiyan.github.io/1chan-x/css"; // prod
+
+var UPLOAD_API = 'https://catbox.moe/user/api.php';
 
 // ========================== General utilities and prototype extensions ==========================
 
@@ -162,6 +167,13 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+/*function fileToURIComponent(file) {return new Promise((resolve, reject) => {
+  let fr = new FileReader()
+  fr.onload = (event) => resolve(encodeURIComponent(event.target.result))
+  fr.onerror = reject
+  fr.readAsDataURL(file)
+})}*/
+
 // =============================== Greasemonkey utils and polyfills ===============================
 // Greasemonkey switched to a fully async API since v.4, yet older versions must be supported
 
@@ -200,34 +212,34 @@ function GM_getJSON(_x2) {
   return _GM_getJSON.apply(this, arguments);
 } // ======================================== Site settings =========================================
 function _GM_getJSON() {
-  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee21(key) {
+  _GM_getJSON = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee26(key) {
     var v, data;
-    return _regeneratorRuntime().wrap(function _callee21$(_context22) {
-      while (1) switch (_context22.prev = _context22.next) {
+    return _regeneratorRuntime().wrap(function _callee26$(_context27) {
+      while (1) switch (_context27.prev = _context27.next) {
         case 0:
-          _context22.next = 2;
+          _context27.next = 2;
           return GM.getValue(key);
         case 2:
-          v = _context22.sent;
+          v = _context27.sent;
           if (v) {
-            _context22.next = 5;
+            _context27.next = 5;
             break;
           }
-          return _context22.abrupt("return", null);
+          return _context27.abrupt("return", null);
         case 5:
-          _context22.prev = 5;
+          _context27.prev = 5;
           data = JSON.parse(v);
-          return _context22.abrupt("return", data);
+          return _context27.abrupt("return", data);
         case 10:
-          _context22.prev = 10;
-          _context22.t0 = _context22["catch"](5);
+          _context27.prev = 10;
+          _context27.t0 = _context27["catch"](5);
           GM.deleteValue(key);
           console.warn("Deleted \"".concat(key, "\" from GM storage due to wrong format"));
         case 14:
         case "end":
-          return _context22.stop();
+          return _context27.stop();
       }
-    }, _callee21, null, [[5, 10]]);
+    }, _callee26, null, [[5, 10]]);
   }));
   return _GM_getJSON.apply(this, arguments);
 }
@@ -975,14 +987,16 @@ var formAugmentation = {
           case 0:
             this.area = this.getTextArea();
             if (!this.area) {
-              _context10.next = 7;
+              _context10.next = 9;
               break;
             }
             _context10.next = 4;
             return this.setupExtraPanel();
           case 4:
             this.setupMarkupPanel();
-            this.setupImgLinkPasting();
+            this.handlePasting();
+            this.handleDropping();
+            this.area.setAttribute('placeholder', 'Сюда можно бросать и вставлять из буфера обмена файлы');
             ['smileys', 'snippets'].forEach( /*#__PURE__*/function () {
               var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(type) {
                 return _regeneratorRuntime().wrap(function _callee8$(_context9) {
@@ -1002,9 +1016,9 @@ var formAugmentation = {
                 return _ref7.apply(this, arguments);
               };
             }());
-          case 7:
+          case 9:
             this.init_images(); // always needed so a user can add image snippets
-          case 8:
+          case 10:
           case "end":
             return _context10.stop();
         }
@@ -1179,7 +1193,8 @@ var formAugmentation = {
     var _siteSpecific$current,
       _siteSpecific$current2,
       _this13 = this;
-    var markPan = this.area._ins('beforebegin', "<div class=\"x1-markup-panel\">\n      <button type=\"button\" class=\"x1-btn x1-add-text-snippet\" title=\"\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u043A\u0430\u043A \u0437\u0430\u0433\u043E\u0442\u043E\u0432\u043A\u0443\" style=\"float:right\">+ \u0421\u043D\u0438\u043F\u043F\u0435\u0442</button>\n      <div class=\"x1-btn-group x1-inline-btn-group\">\n        <button type=\"button\" class=\"x1-btn x1-bb-code\" title=\"\u0416\u0438\u0440\u043D\u044B\u0439\" data-start=\"**\" data-end=\"**\"><b>\u0416</b></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code\" title=\"\u041A\u0443\u0440\u0441\u0438\u0432\" data-start=\"*\" data-end=\"*\"><i>\u041A</i></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0417\u0430\u0447\u0435\u0440\u043A\u043D\u0443\u0442\u043E\" data-start=\"--\" data-end=\"--\"><s>Z</s></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code\" title=\"\u0421\u043F\u043E\u0439\u043B\u0435\u0440\" data-start=\"%%\" data-end=\"%%\"><span class=\"b-spoiler-text\">%</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"=== \" data-end=\" ===\"><span style=\"transform: scale(1.25); display: block\">H2</span></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0434\u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"## \" data-end=\" ##\">H3</button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\"> \n        <button type=\"button\" class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-force-inline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439\" data-start=\"&#96;\" data-end=\"&#96;\">();</button>\n        <button type=\"button\" class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-outer-newline x1-bb-inner-newline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439 \u0431\u043B\u043E\u043A\" data-start=\"/---\" data-end=\"&#92;---\"><span>{</span><span>}</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0426\u0438\u0442\u0430\u0442\u0430\" data-start=\"&gt;&gt;\" data-end=\"&lt;&lt;\" style=\"color:#789922\">\xAB\xBB</button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0441\u0442\u0440\u043E\u0447\u043D\u043E\u0435 \u0446\u0438\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435\" data-start=\"&gt; \" style=\"color:#789922\">&gt; </button>\n      </div>\n      <button type=\"button\" class=\"x1-btn x1-insert-url\" title=\"\u0412\u0441\u0442\u0430\u0432\u0438\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443\"><div class=\"x1-url-icon\"></div></button>\n      ".concat((_siteSpecific$current = siteSpecific.current) !== null && _siteSpecific$current !== void 0 && (_siteSpecific$current2 = _siteSpecific$current.features) !== null && _siteSpecific$current2 !== void 0 && _siteSpecific$current2.includes('voice') ? "<button type=\"button\" class=\"x1-btn x1-select-voice\" title=\"Text-to-speech\">TTS</button>" : '', "\n    </div>"), true);
+    var markPan = this.area._ins('beforebegin', "<div class=\"x1-markup-panel\">\n      <button type=\"button\" class=\"x1-btn x1-add-text-snippet\" title=\"\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C \u0432\u044B\u0434\u0435\u043B\u0435\u043D\u043D\u044B\u0439 \u0442\u0435\u043A\u0441\u0442 \u043A\u0430\u043A \u0437\u0430\u0433\u043E\u0442\u043E\u0432\u043A\u0443\" style=\"float:right\">+ \u0421\u043D\u0438\u043F\u043F\u0435\u0442</button>\n      <div class=\"x1-btn-group x1-inline-btn-group\">\n        <button type=\"button\" class=\"x1-btn x1-bb-code\" title=\"\u0416\u0438\u0440\u043D\u044B\u0439\" data-start=\"**\" data-end=\"**\"><b>\u0416</b></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code\" title=\"\u041A\u0443\u0440\u0441\u0438\u0432\" data-start=\"*\" data-end=\"*\"><i>\u041A</i></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0417\u0430\u0447\u0435\u0440\u043A\u043D\u0443\u0442\u043E\" data-start=\"--\" data-end=\"--\"><s>Z</s></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code\" title=\"\u0421\u043F\u043E\u0439\u043B\u0435\u0440\" data-start=\"%%\" data-end=\"%%\"><span class=\"b-spoiler-text\">%</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"=== \" data-end=\" ===\"><span style=\"transform: scale(1.25); display: block\">H2</span></button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0434\u0437\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A\" data-start=\"## \" data-end=\" ##\">H3</button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\"> \n        <button type=\"button\" class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-force-inline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439\" data-start=\"&#96;\" data-end=\"&#96;\">();</button>\n        <button type=\"button\" class=\"x1-btn x1-btn-monospace x1-bb-code x1-bb-outer-newline x1-bb-inner-newline\" title=\"\u041C\u043E\u043D\u043E\u0448\u0438\u0440\u0438\u043D\u043D\u044B\u0439 \u0431\u043B\u043E\u043A\" data-start=\"/---\" data-end=\"&#92;---\"><span>{</span><span>}</span></button>\n      </div> <div class=\"x1-btn-group x1-inline-btn-group\">  \n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline\" title=\"\u0426\u0438\u0442\u0430\u0442\u0430\" data-start=\"&gt;&gt;\" data-end=\"&lt;&lt;\" style=\"color:#789922\">\xAB\xBB</button>\n        <button type=\"button\" class=\"x1-btn x1-bb-code x1-bb-force-inline x1-bb-outer-newline\" title=\"\u041F\u043E\u0441\u0442\u0440\u043E\u0447\u043D\u043E\u0435 \u0446\u0438\u0442\u0438\u0440\u043E\u0432\u0430\u043D\u0438\u0435\" data-start=\"&gt; \" style=\"color:#789922\">&gt; </button>\n      </div>\n      <button type=\"button\" class=\"x1-btn x1-insert-url\" title=\"\u0412\u0441\u0442\u0430\u0432\u0438\u0442\u044C \u0441\u0441\u044B\u043B\u043A\u0443\"><div class=\"x1-url-icon\"></div></button>\n      ".concat((_siteSpecific$current = siteSpecific.current) !== null && _siteSpecific$current !== void 0 && (_siteSpecific$current2 = _siteSpecific$current.features) !== null && _siteSpecific$current2 !== void 0 && _siteSpecific$current2.includes('voice') ? "<button type=\"button\" class=\"x1-btn x1-select-voice\" title=\"Text-to-speech\">TTS</button>" : '', "\n      <button type=\"button\" class=\"x1-btn x1-add-file\" title=\"\u0417\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044C \u0444\u0430\u0439\u043B\">\u0424\u0430\u0439\u043B \u2191</button>\n    </div>"), true);
+    this.fileInput = document.body._ins('afterend', "<input type=\"file\" id=\"x1-file-input\" style=\"display: none\">", true);
     markPan._$$('.x1-bb-code').forEach(function (bb) {
       bb.addEventListener('click', function (ev) {
         ev.preventDefault();
@@ -1203,6 +1218,13 @@ var formAugmentation = {
         start: "\"",
         end: "\":".concat(url, " ")
       });
+    });
+    markPan._$('.x1-add-file').addEventListener('click', function (ev) {
+      ev.preventDefault();
+      _this13.fileInput.click();
+    });
+    this.fileInput.addEventListener('change', function (ev) {
+      _this13.processFiles(_toConsumableArray(ev.target.files));
     });
     var ttsBtn = markPan._$('.x1-select-voice');
     ttsBtn === null || ttsBtn === void 0 ? void 0 : ttsBtn.addEventListener('click', function (ev) {
@@ -1361,33 +1383,28 @@ var formAugmentation = {
     }
     return parseLink;
   }(),
-  setupImgLinkPasting: function setupImgLinkPasting() {
+  handlePasting: function handlePasting() {
     var _this14 = this;
     this.area.addEventListener('paste', /*#__PURE__*/function () {
       var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee13(ev) {
         var _ev$clipboardData;
-        var txt, _yield$_this14$parseL, _yield$_this14$parseL2, service, code, codeWrapped;
+        var fileItems, _ev$clipboardData2, txt;
         return _regeneratorRuntime().wrap(function _callee13$(_context14) {
           while (1) switch (_context14.prev = _context14.next) {
             case 0:
-              txt = ev === null || ev === void 0 ? void 0 : (_ev$clipboardData = ev.clipboardData) === null || _ev$clipboardData === void 0 ? void 0 : _ev$clipboardData.getData('text');
-              _context14.next = 3;
-              return _this14.parseLink(txt);
-            case 3:
-              _yield$_this14$parseL = _context14.sent;
-              _yield$_this14$parseL2 = _slicedToArray(_yield$_this14$parseL, 2);
-              service = _yield$_this14$parseL2[0];
-              code = _yield$_this14$parseL2[1];
-              if (code) {
-                codeWrapped = _this14.addImageSnippet({
-                  service: service,
-                  code: code
-                });
-                window.requestAnimationFrame(function () {
-                  _this14.area.value = _this14.area.value.replace(txt, codeWrapped);
-                });
+              // Handle files
+              fileItems = _toConsumableArray((ev === null || ev === void 0 ? void 0 : (_ev$clipboardData = ev.clipboardData) === null || _ev$clipboardData === void 0 ? void 0 : _ev$clipboardData.items) || []).filter(function (item) {
+                return (item === null || item === void 0 ? void 0 : item.kind) == 'file';
+              });
+              if (fileItems.length) {
+                _this14.processFiles(fileItems);
               }
-            case 8:
+              // Handle image links
+              else {
+                txt = ev === null || ev === void 0 ? void 0 : (_ev$clipboardData2 = ev.clipboardData) === null || _ev$clipboardData2 === void 0 ? void 0 : _ev$clipboardData2.getData('text');
+                if (txt) _this14.processPastedText(txt, true);
+              }
+            case 2:
             case "end":
               return _context14.stop();
           }
@@ -1398,6 +1415,183 @@ var formAugmentation = {
       };
     }());
   },
+  handleDropping: function handleDropping() {
+    var _this15 = this;
+    this.area.addEventListener('drop', function (ev) {
+      var _ev$dataTransfer, _ev$dataTransfer$file;
+      if ((_ev$dataTransfer = ev.dataTransfer) !== null && _ev$dataTransfer !== void 0 && (_ev$dataTransfer$file = _ev$dataTransfer.files) !== null && _ev$dataTransfer$file !== void 0 && _ev$dataTransfer$file.length) {
+        ev.preventDefault();
+        _this15.processFiles(_toConsumableArray(ev.dataTransfer.files));
+      }
+    });
+  },
+  uploadFile: function uploadFile(file) {
+    return new Promise( /*#__PURE__*/function () {
+      var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee14(resolve, reject) {
+        var fd;
+        return _regeneratorRuntime().wrap(function _callee14$(_context15) {
+          while (1) switch (_context15.prev = _context15.next) {
+            case 0:
+              fd = new FormData();
+              fd.append('reqtype', 'fileupload');
+              fd.append('userhash', '');
+              fd.append('fileToUpload', file);
+              GM.xmlHttpRequest({
+                method: "POST",
+                url: UPLOAD_API,
+                headers: _defineProperty({
+                  "accept": "application/json",
+                  "cache-control": "no-cache",
+                  "sec-fetch-dest": "empty",
+                  "sec-fetch-mode": "cors",
+                  "sec-fetch-site": "same-origin",
+                  "x-requested-with": "XMLHttpRequest"
+                }, "accept", "application/json"),
+                "credentials": "include",
+                onload: function onload(res) {
+                  resolve(res);
+                },
+                onerror: function onerror(e) {
+                  reject(e);
+                },
+                data: fd,
+                fetch: true // https://stackoverflow.com/a/77206951/1561204
+              });
+            case 5:
+            case "end":
+              return _context15.stop();
+          }
+        }, _callee14);
+      }));
+      return function (_x15, _x16) {
+        return _ref10.apply(this, arguments);
+      };
+    }());
+  },
+  processFiles: function () {
+    var _processFiles = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee17(fileItems) {
+      var _this16 = this;
+      var uploadMsg;
+      return _regeneratorRuntime().wrap(function _callee17$(_context18) {
+        while (1) switch (_context18.prev = _context18.next) {
+          case 0:
+            uploadMsg = this.area._ins('afterend', "<div class=\"x1-message\">\u0417\u0430\u0433\u0440\u0443\u0436\u0430\u0435\u043C \u0444\u0430\u0439\u043B\u044B...</div>", true);
+            _context18.next = 3;
+            return Promise.all(fileItems.map( /*#__PURE__*/function () {
+              var _ref11 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee16(file) {
+                return _regeneratorRuntime().wrap(function _callee16$(_context17) {
+                  while (1) switch (_context17.prev = _context17.next) {
+                    case 0:
+                      return _context17.abrupt("return", new Promise( /*#__PURE__*/function () {
+                        var _ref12 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee15(resolve) {
+                          var _yield$_this16$upload, txt;
+                          return _regeneratorRuntime().wrap(function _callee15$(_context16) {
+                            while (1) switch (_context16.prev = _context16.next) {
+                              case 0:
+                                if (!(file instanceof File)) file = file.getAsFile();
+                                _context16.prev = 1;
+                                _context16.next = 4;
+                                return _this16.uploadFile(file);
+                              case 4:
+                                _context16.t1 = _yield$_this16$upload = _context16.sent;
+                                _context16.t0 = _context16.t1 === null;
+                                if (_context16.t0) {
+                                  _context16.next = 8;
+                                  break;
+                                }
+                                _context16.t0 = _yield$_this16$upload === void 0;
+                              case 8:
+                                if (!_context16.t0) {
+                                  _context16.next = 12;
+                                  break;
+                                }
+                                _context16.t2 = void 0;
+                                _context16.next = 13;
+                                break;
+                              case 12:
+                                _context16.t2 = _yield$_this16$upload.responseText;
+                              case 13:
+                                txt = _context16.t2;
+                                if (txt) _this16.processPastedText(txt, false);
+                                _context16.next = 20;
+                                break;
+                              case 17:
+                                _context16.prev = 17;
+                                _context16.t3 = _context16["catch"](1);
+                                console.error('File upload error: ', _context16.t3);
+                              case 20:
+                                resolve();
+                              case 21:
+                              case "end":
+                                return _context16.stop();
+                            }
+                          }, _callee15, null, [[1, 17]]);
+                        }));
+                        return function (_x19) {
+                          return _ref12.apply(this, arguments);
+                        };
+                      }()));
+                    case 1:
+                    case "end":
+                      return _context17.stop();
+                  }
+                }, _callee16);
+              }));
+              return function (_x18) {
+                return _ref11.apply(this, arguments);
+              };
+            }()));
+          case 3:
+            uploadMsg.remove();
+          case 4:
+          case "end":
+            return _context18.stop();
+        }
+      }, _callee17, this);
+    }));
+    function processFiles(_x17) {
+      return _processFiles.apply(this, arguments);
+    }
+    return processFiles;
+  }(),
+  processPastedText: function () {
+    var _processPastedText = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18(txt, replace) {
+      var _this17 = this;
+      var _yield$this$parseLink, _yield$this$parseLink2, service, code, codeWrapped;
+      return _regeneratorRuntime().wrap(function _callee18$(_context19) {
+        while (1) switch (_context19.prev = _context19.next) {
+          case 0:
+            _context19.next = 2;
+            return this.parseLink(txt);
+          case 2:
+            _yield$this$parseLink = _context19.sent;
+            _yield$this$parseLink2 = _slicedToArray(_yield$this$parseLink, 2);
+            service = _yield$this$parseLink2[0];
+            code = _yield$this$parseLink2[1];
+            if (code) {
+              _context19.next = 8;
+              break;
+            }
+            return _context19.abrupt("return");
+          case 8:
+            codeWrapped = this.addImageSnippet({
+              service: service,
+              code: code
+            });
+            window.requestAnimationFrame(function () {
+              _this17.area.value = replace ? _this17.area.value.replace(txt, codeWrapped) : _this17.area.value + codeWrapped;
+            });
+          case 10:
+          case "end":
+            return _context19.stop();
+        }
+      }, _callee18, this);
+    }));
+    function processPastedText(_x20, _x21) {
+      return _processPastedText.apply(this, arguments);
+    }
+    return processPastedText;
+  }(),
   forceRevealPane: function forceRevealPane(id) {
     var _$;
     return (_$ = $(".x1-btn:not(.x1-xp-switcher-selected)[data-pane=".concat(id, "]"))) === null || _$ === void 0 ? void 0 : _$.click();
@@ -1414,16 +1608,16 @@ var formAugmentation = {
     GM.setValue('text-snippets', JSON.stringify(this.textSnippets));
   },
   init_images: function () {
-    var _init_images = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee14() {
-      var _this15 = this;
+    var _init_images = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee19() {
+      var _this18 = this;
       var images, _iterator2, _step2, entry, svc, code, thumb, _entry$split, _entry$split2, skip, service;
-      return _regeneratorRuntime().wrap(function _callee14$(_context15) {
-        while (1) switch (_context15.prev = _context15.next) {
+      return _regeneratorRuntime().wrap(function _callee19$(_context20) {
+        while (1) switch (_context20.prev = _context20.next) {
           case 0:
             // Filter and modify image services for the specific site, generate reverse expressions
             siteSpecific.current.imgSvc.supported.forEach(function (svc) {
               var _siteSpecific$current3;
-              var service = Object.assign(_this15.defaultImageServices[svc], ((_siteSpecific$current3 = siteSpecific.current.imgSvc) === null || _siteSpecific$current3 === void 0 ? void 0 : _siteSpecific$current3[svc]) || {});
+              var service = Object.assign(_this18.defaultImageServices[svc], ((_siteSpecific$current3 = siteSpecific.current.imgSvc) === null || _siteSpecific$current3 === void 0 ? void 0 : _siteSpecific$current3[svc]) || {});
               // Named image service expressions
               if (service.key !== false) {
                 service.reverseExp = new RegExp("^\\[".concat(service.key, "\\:([^\\s\\/\\:]+)\\:\\]"), 'i');
@@ -1441,42 +1635,42 @@ var formAugmentation = {
                 service.reverseExp = new RegExp("^\\[".concat(service.exp.source.slice(1, -1), "\\]$"), 'i');
               }
               if (service.reverseExp) {
-                _this15.imageServices[svc] = service;
+                _this18.imageServices[svc] = service;
               } else {
                 console.warn('Unable to generate reverse expression for: ', svc);
               }
             });
-            _context15.next = 3;
+            _context20.next = 3;
             return GM_getJSON('image-snippets');
           case 3:
-            images = _context15.sent;
+            images = _context20.sent;
             if (!(images !== null && images !== void 0 && images.length)) {
-              _context15.next = 36;
+              _context20.next = 36;
               break;
             }
             _iterator2 = _createForOfIteratorHelper(images);
-            _context15.prev = 6;
+            _context20.prev = 6;
             _iterator2.s();
           case 8:
             if ((_step2 = _iterator2.n()).done) {
-              _context15.next = 28;
+              _context20.next = 28;
               break;
             }
             entry = _step2.value;
             svc = void 0, code = void 0, thumb = void 0;
-            _context15.prev = 11;
+            _context20.prev = 11;
             _entry$split = entry.split(' ');
             _entry$split2 = _slicedToArray(_entry$split, 3);
             svc = _entry$split2[0];
             code = _entry$split2[1];
             thumb = _entry$split2[2];
-            _context15.next = 23;
+            _context20.next = 23;
             break;
           case 19:
-            _context15.prev = 19;
-            _context15.t0 = _context15["catch"](11);
+            _context20.prev = 19;
+            _context20.t0 = _context20["catch"](11);
             console.warn('Image snippet has wrong format: ', entry);
-            return _context15.abrupt("continue", 26);
+            return _context20.abrupt("continue", 26);
           case 23:
             // Unsupported snippets will be added to the model to keep it 
             skip = true; // consistent across sites but no actual snipet will be created
@@ -1498,24 +1692,24 @@ var formAugmentation = {
               save: false
             });
           case 26:
-            _context15.next = 8;
+            _context20.next = 8;
             break;
           case 28:
-            _context15.next = 33;
+            _context20.next = 33;
             break;
           case 30:
-            _context15.prev = 30;
-            _context15.t1 = _context15["catch"](6);
-            _iterator2.e(_context15.t1);
+            _context20.prev = 30;
+            _context20.t1 = _context20["catch"](6);
+            _iterator2.e(_context20.t1);
           case 33:
-            _context15.prev = 33;
+            _context20.prev = 33;
             _iterator2.f();
-            return _context15.finish(33);
+            return _context20.finish(33);
           case 36:
           case "end":
-            return _context15.stop();
+            return _context20.stop();
         }
-      }, _callee14, this, [[6, 30, 33, 36], [11, 19]]);
+      }, _callee19, this, [[6, 30, 33, 36], [11, 19]]);
     }));
     function init_images() {
       return _init_images.apply(this, arguments);
@@ -1543,18 +1737,18 @@ var formAugmentation = {
   },
   addImageSnippet: /*async*/function addImageSnippet() {
     var _$2,
-      _this16 = this;
-    var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      service = _ref10.service,
-      code = _ref10.code,
-      _ref10$thumb = _ref10.thumb,
-      thumb = _ref10$thumb === void 0 ? false : _ref10$thumb,
-      _ref10$save = _ref10.save,
-      save = _ref10$save === void 0 ? true : _ref10$save,
-      _ref10$skip = _ref10.skip,
-      skip = _ref10$skip === void 0 ? false : _ref10$skip,
-      _ref10$fromPost = _ref10.fromPost,
-      fromPost = _ref10$fromPost === void 0 ? false : _ref10$fromPost;
+      _this19 = this;
+    var _ref13 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      service = _ref13.service,
+      code = _ref13.code,
+      _ref13$thumb = _ref13.thumb,
+      thumb = _ref13$thumb === void 0 ? false : _ref13$thumb,
+      _ref13$save = _ref13.save,
+      save = _ref13$save === void 0 ? true : _ref13$save,
+      _ref13$skip = _ref13.skip,
+      skip = _ref13$skip === void 0 ? false : _ref13$skip,
+      _ref13$fromPost = _ref13.fromPost,
+      fromPost = _ref13$fromPost === void 0 ? false : _ref13$fromPost;
     var dup = this.findImageSnippet(service, code);
     if (dup) {
       console.warn('Image already present');
@@ -1580,14 +1774,14 @@ var formAugmentation = {
     if (imgLink) {
       imgLink.addEventListener('click', function (ev) {
         ev.preventDefault();
-        _this16.insertText({
+        _this19.insertText({
           end: codeWrapped
         });
       });
       imgLink._$('.x1-snippet-delete').addEventListener('click', function (ev) {
         ev.preventDefault();
         ev.stopPropagation();
-        _this16.deleteImageSnippet(service, code, imgLink);
+        _this19.deleteImageSnippet(service, code, imgLink);
       });
       if (save) {
         this.forceRevealPane('images');
@@ -1596,28 +1790,28 @@ var formAugmentation = {
     return codeWrapped;
   },
   init_snippets: function () {
-    var _init_snippets = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee15() {
-      var _this17 = this;
+    var _init_snippets = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20() {
+      var _this20 = this;
       var snippets;
-      return _regeneratorRuntime().wrap(function _callee15$(_context16) {
-        while (1) switch (_context16.prev = _context16.next) {
+      return _regeneratorRuntime().wrap(function _callee20$(_context21) {
+        while (1) switch (_context21.prev = _context21.next) {
           case 0:
-            _context16.next = 2;
+            _context21.next = 2;
             return GM_getJSON('text-snippets');
           case 2:
-            snippets = _context16.sent;
+            snippets = _context21.sent;
             if (snippets !== null && snippets !== void 0 && snippets.length) {
               snippets.forEach(function (txt) {
                 if (typeof txt == 'string') {
-                  _this17.addTextSnippet(txt, false);
+                  _this20.addTextSnippet(txt, false);
                 }
               });
             }
           case 4:
           case "end":
-            return _context16.stop();
+            return _context21.stop();
         }
-      }, _callee15);
+      }, _callee20);
     }));
     function init_snippets() {
       return _init_snippets.apply(this, arguments);
@@ -1625,7 +1819,7 @@ var formAugmentation = {
     return init_snippets;
   }(),
   addTextSnippet: function addTextSnippet() {
-    var _this18 = this;
+    var _this21 = this;
     var txt = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.area.value.slice(this.area.selectionStart, this.area.selectionEnd);
     var save = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
     if (!txt.length || this.textSnippets.includes(txt)) return;
@@ -1647,7 +1841,7 @@ var formAugmentation = {
     if (!imgFound) {
       var snippet = $('#x1-xp-pane-snippets')._ins('afterbegin', "<div class=\"x1-snippet x1-txt-snippet\">\n        ".concat(escapeHtml(txt).replace(/\n/g, ' <br>'), "\n        <div class=\"x1-floating-btn x1-snippet-action x1-snippet-expand\" title=\"\u0420\u0430\u0437\u0432\u0435\u0440\u043D\u0443\u0442\u044C\"></div>\n        <div class=\"x1-floating-btn x1-snippet-action x1-snippet-collapse\" title=\"\u0421\u0432\u0435\u0440\u043D\u0443\u0442\u044C\"></div>\n        <div class=\"x1-floating-btn x1-snippet-action x1-snippet-delete\" title=\"\u0423\u0434\u0430\u043B\u0438\u0442\u044C\"></div>\n      </div>"), true);
       snippet.addEventListener('click', function (ev) {
-        return _this18.insertText({
+        return _this21.insertText({
           end: txt
         });
       });
@@ -1665,10 +1859,10 @@ var formAugmentation = {
         }
         if (btn.classList.contains('x1-snippet-delete')) {
           action = function action() {
-            _this18.textSnippets = _this18.textSnippets.filter(function (s) {
+            _this21.textSnippets = _this21.textSnippets.filter(function (s) {
               return s != txt;
             });
-            _this18.saveTxtSnippets();
+            _this21.saveTxtSnippets();
             snippet.remove();
           };
         }
@@ -1687,21 +1881,21 @@ var formAugmentation = {
 };
 var hiddenItems = {
   init: function () {
-    var _init2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee16() {
-      return _regeneratorRuntime().wrap(function _callee16$(_context17) {
-        while (1) switch (_context17.prev = _context17.next) {
+    var _init2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee21() {
+      return _regeneratorRuntime().wrap(function _callee21$(_context22) {
+        while (1) switch (_context22.prev = _context22.next) {
           case 0:
             this.initPosts();
-            _context17.next = 3;
+            _context22.next = 3;
             return this.initText();
           case 3:
-            _context17.next = 5;
+            _context22.next = 5;
             return this.initImages();
           case 5:
           case "end":
-            return _context17.stop();
+            return _context22.stop();
         }
-      }, _callee16, this);
+      }, _callee21, this);
     }));
     function init() {
       return _init2.apply(this, arguments);
@@ -1755,29 +1949,29 @@ var hiddenItems = {
     this.saveImages();
   },
   initImages: function () {
-    var _initImages = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee17() {
-      var _this19 = this;
+    var _initImages = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee22() {
+      var _this22 = this;
       var images;
-      return _regeneratorRuntime().wrap(function _callee17$(_context18) {
-        while (1) switch (_context18.prev = _context18.next) {
+      return _regeneratorRuntime().wrap(function _callee22$(_context23) {
+        while (1) switch (_context23.prev = _context23.next) {
           case 0:
             this.url_area = $('#x1-url-hidelist');
             $('#x1-update-url-hidelist').addEventListener('click', function () {
-              return _this19.updateImagesFromUI();
+              return _this22.updateImagesFromUI();
             });
-            _context18.next = 4;
+            _context23.next = 4;
             return GM_getJSON('image-hidelist');
           case 4:
-            images = _context18.sent;
+            images = _context23.sent;
             if (images !== null && images !== void 0 && images.length) {
               this.processImageList(images);
               this.updateImageUI();
             }
           case 6:
           case "end":
-            return _context18.stop();
+            return _context23.stop();
         }
-      }, _callee17, this);
+      }, _callee22, this);
     }));
     function initImages() {
       return _initImages.apply(this, arguments);
@@ -1785,13 +1979,13 @@ var hiddenItems = {
     return initImages;
   }(),
   processImageList: function processImageList(images) {
-    var _this20 = this;
+    var _this23 = this;
     images.map(function (url) {
       return url.trim();
     }).filter(function (url) {
       return url.length;
     }).forEach(function (url) {
-      return _this20.addImage(url, true);
+      return _this23.addImage(url, true);
     });
   },
   // ----------------------------- Text -----------------------------
@@ -1801,11 +1995,11 @@ var hiddenItems = {
     return txt.trim().toLowerCase();
   },
   addText: function addText(txt) {
-    var _ref11 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
-      _ref11$refresh = _ref11.refresh,
-      refresh = _ref11$refresh === void 0 ? true : _ref11$refresh,
-      _ref11$tryRegExp = _ref11.tryRegExp,
-      tryRegExp = _ref11$tryRegExp === void 0 ? false : _ref11$tryRegExp;
+    var _ref14 = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref14$refresh = _ref14.refresh,
+      refresh = _ref14$refresh === void 0 ? true : _ref14$refresh,
+      _ref14$tryRegExp = _ref14.tryRegExp,
+      tryRegExp = _ref14$tryRegExp === void 0 ? false : _ref14$tryRegExp;
     txt = this.normalizeText(txt);
     if (!txt || this.texts.includes(txt)) return;
     var rx = false;
@@ -1861,11 +2055,11 @@ var hiddenItems = {
     this.rescan();
   },
   processTextList: function processTextList(lines) {
-    var _this21 = this;
+    var _this24 = this;
     this.texts = [];
     this.regExps = [];
     lines.forEach(function (line) {
-      _this21.addText(line, {
+      _this24.addText(line, {
         refresh: false,
         tryRegExp: true
       });
@@ -1878,20 +2072,20 @@ var hiddenItems = {
     if (fromUI) settings.flashLabel('text-hidelist');
   },
   initText: function () {
-    var _initText = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee18() {
-      var _this22 = this;
+    var _initText = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee23() {
+      var _this25 = this;
       var texts;
-      return _regeneratorRuntime().wrap(function _callee18$(_context19) {
-        while (1) switch (_context19.prev = _context19.next) {
+      return _regeneratorRuntime().wrap(function _callee23$(_context24) {
+        while (1) switch (_context24.prev = _context24.next) {
           case 0:
             this.text_area = $('#x1-text-hidelist');
             $('#x1-update-text-hidelist').addEventListener('click', function () {
-              return _this22.updateTextFromUI();
+              return _this25.updateTextFromUI();
             });
-            _context19.next = 4;
+            _context24.next = 4;
             return GM_getJSON('text-hidelist');
           case 4:
-            texts = _context19.sent;
+            texts = _context24.sent;
             if (texts !== null && texts !== void 0 && texts.length) {
               this.processTextList(texts);
               this.updateTextUI();
@@ -1899,9 +2093,9 @@ var hiddenItems = {
             }
           case 6:
           case "end":
-            return _context19.stop();
+            return _context24.stop();
         }
-      }, _callee18, this);
+      }, _callee23, this);
     }));
     function initText() {
       return _initText.apply(this, arguments);
@@ -1976,12 +2170,12 @@ var hiddenItems = {
   },
   // --------------------------- General ----------------------------
   rescan: function rescan() {
-    var _this23 = this;
+    var _this26 = this;
     ;
     ['b-blog-entry', 'b-comment'].forEach(function (sel) {
       $$(".".concat(sel)).forEach(function (post) {
         var body = post._$(".".concat(sel, "_b-body"));
-        if (body) _this23.scanPost(post, body);
+        if (body) _this26.scanPost(post, body);
       });
     });
   },
@@ -2024,25 +2218,25 @@ var hiddenItems = {
     } else return false;
   },
   scanImage: function () {
-    var _scanImage = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee19(img, post, isUnhidden) {
+    var _scanImage = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee24(img, post, isUnhidden) {
       var toHide, imgData, _yield$comments$getIm, hideByImg, hideByLink, link;
-      return _regeneratorRuntime().wrap(function _callee19$(_context20) {
-        while (1) switch (_context20.prev = _context20.next) {
+      return _regeneratorRuntime().wrap(function _callee24$(_context25) {
+        while (1) switch (_context25.prev = _context25.next) {
           case 0:
             post.classList.remove('x1-hidden-by-image');
             toHide = false;
-            _context20.next = 4;
+            _context25.next = 4;
             return comments.getImgData(img);
           case 4:
-            imgData = _context20.sent;
+            imgData = _context25.sent;
             if (!imgData) {
-              _context20.next = 14;
+              _context25.next = 14;
               break;
             }
-            _context20.next = 8;
+            _context25.next = 8;
             return comments.getImgData(img);
           case 8:
-            _yield$comments$getIm = _context20.sent;
+            _yield$comments$getIm = _context25.sent;
             hideByImg = _yield$comments$getIm.hideByImg;
             hideByLink = _yield$comments$getIm.hideByLink;
             link = _yield$comments$getIm.link;
@@ -2050,11 +2244,11 @@ var hiddenItems = {
             if (this.isImgHidden(link, hideByImg, hideByLink) && !isUnhidden) post.classList.add('x1-post-hidden', 'x1-hidden-by-image');
           case 14:
           case "end":
-            return _context20.stop();
+            return _context25.stop();
         }
-      }, _callee19, this);
+      }, _callee24, this);
     }));
-    function scanImage(_x15, _x16, _x17) {
+    function scanImage(_x22, _x23, _x24) {
       return _scanImage.apply(this, arguments);
     }
     return scanImage;
@@ -2145,8 +2339,8 @@ function setupPanels() {
   });
 }
 function fixMenuForTouch() {
-  var _ref12;
-  var ul = (_ref12 = $('.b-blog-panel') || $('.b-chat-panel')) === null || _ref12 === void 0 ? void 0 : _ref12._$('ul');
+  var _ref15;
+  var ul = (_ref15 = $('.b-blog-panel') || $('.b-chat-panel')) === null || _ref15 === void 0 ? void 0 : _ref15._$('ul');
   if (ul && ul._$('li img + a')) {
     ul._$$('li').forEach(function (li) {
       var _icon, _icon$textContent;
@@ -2186,10 +2380,10 @@ var darkTheme = {
     document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-").concat(this.isDark ? 'dark' : 'normal', ".css\">"));
   },
   addSwitcher: function addSwitcher() {
-    var _this24 = this;
+    var _this27 = this;
     $('#x1-settings-open')._ins('afterend', "<a class=\"x1-theme-switcher\" href=\"/service/theme/".concat(this.isDark ? 'normal' : 'omsk', "\" title=\"\u041F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u0442\u0435\u043C\u0443\"></a>"), true).addEventListener('click', function (ev) {
       ev.preventDefault();
-      _this24.handleThemeSwitch();
+      _this27.handleThemeSwitch();
     });
   },
   handleThemeSwitch: function handleThemeSwitch() {
@@ -2232,13 +2426,13 @@ var darkTheme = {
 };
 var quickScroll = {
   init: function init() {
-    var _this25 = this;
+    var _this28 = this;
     this.e = document.body._ins('afterbegin', "<div id=\"x1-quick-scroll\"><div>\u2193</div></div>", true);
     this.e.addEventListener('click', function () {
-      return _this25.scroll();
+      return _this28.scroll();
     });
     window.addEventListener('scroll', function () {
-      return _this25.update();
+      return _this28.update();
     });
     this.update();
   },
@@ -2267,13 +2461,13 @@ function initAll() {
   return _initAll.apply(this, arguments);
 }
 function _initAll() {
-  _initAll = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee22() {
+  _initAll = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee27() {
     var state, val;
-    return _regeneratorRuntime().wrap(function _callee22$(_context23) {
-      while (1) switch (_context23.prev = _context23.next) {
+    return _regeneratorRuntime().wrap(function _callee27$(_context28) {
+      while (1) switch (_context28.prev = _context28.next) {
         case 0:
           settings.init();
-          _context23.next = 3;
+          _context28.next = 3;
           return hiddenItems.init();
         case 3:
           state = determineState();
@@ -2282,10 +2476,10 @@ function _initAll() {
             $('.l-wrap').classList.add("x1-state-".concat(state));
           }
           if (!(stateHandlers !== null && stateHandlers !== void 0 && stateHandlers[state])) {
-            _context23.next = 8;
+            _context28.next = 8;
             break;
           }
-          _context23.next = 8;
+          _context28.next = 8;
           return stateHandlers[state]();
         case 8:
           setupPanels();
@@ -2304,17 +2498,17 @@ function _initAll() {
           }
         case 15:
         case "end":
-          return _context23.stop();
+          return _context28.stop();
       }
-    }, _callee22);
+    }, _callee27);
   }));
   return _initAll.apply(this, arguments);
 }
 ;
 (function () {
-  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee20() {
-    return _regeneratorRuntime().wrap(function _callee20$(_context21) {
-      while (1) switch (_context21.prev = _context21.next) {
+  var _main = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee25() {
+    return _regeneratorRuntime().wrap(function _callee25$(_context26) {
+      while (1) switch (_context26.prev = _context26.next) {
         case 0:
           // Add CSS
           document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-base.css\">"));
@@ -2330,9 +2524,9 @@ function _initAll() {
           }
         case 5:
         case "end":
-          return _context21.stop();
+          return _context26.stop();
       }
-    }, _callee20);
+    }, _callee25);
   }));
   function main() {
     return _main.apply(this, arguments);

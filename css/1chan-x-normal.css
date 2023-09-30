@@ -217,3 +217,7 @@
 #x1-quick-scroll:hover {
     background: #0000000a;
 }
+.x1-message {
+    background: #FFB975;
+    text-shadow: 0px 0px 1px #bbb;
+}

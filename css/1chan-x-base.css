@@ -1264,4 +1264,11 @@ audio, .x1-audio-content {
 .l-wrap:not(.x1-state-newsentry) .b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-info_b-control .js-rate-down-button,
 .l-wrap:not(.x1-state-newsentry) .b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-info_b-control .js-rate {
     display: initial;
-} 
+}
+.x1-message {
+    padding: 0 10px;
+    color: #fff;
+    border-radius: 8px;
+    line-height: 2em;
+    font-size: 0.7em;
+}

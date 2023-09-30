@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.6.0
+// @version      1.7.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -25,6 +25,8 @@
 
 // const cssBaseURL = `https://1chan-x/css`      // dev
 const cssBaseURL = `https://juribiyan.github.io/1chan-x/css` // prod
+
+const UPLOAD_API = 'https://catbox.moe/user/api.php'
 
 // ========================== General utilities and prototype extensions ==========================
 
@@ -155,6 +157,13 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase()
     + str.slice(1)
 }
+
+/*function fileToURIComponent(file) {return new Promise((resolve, reject) => {
+  let fr = new FileReader()
+  fr.onload = (event) => resolve(encodeURIComponent(event.target.result))
+  fr.onerror = reject
+  fr.readAsDataURL(file)
+})}*/
 
 
 // =============================== Greasemonkey utils and polyfills ===============================
@@ -811,7 +820,9 @@ const formAugmentation = {
     if (this.area) {
       await this.setupExtraPanel()
       this.setupMarkupPanel()
-      this.setupImgLinkPasting()
+      this.handlePasting()
+      this.handleDropping()
+      this.area.setAttribute('placeholder', 'Сюда можно бросать и вставлять из буфера обмена файлы')
       ;['smileys', 'snippets'].forEach(async (type) => await this[`init_${type}`]() )
     }
     this.init_images() // always needed so a user can add image snippets
@@ -964,7 +975,9 @@ const formAugmentation = {
       ${siteSpecific.current?.features?.includes('voice') ? 
         `<button type="button" class="x1-btn x1-select-voice" title="Text-to-speech">TTS</button>`
       :''}
+      <button type="button" class="x1-btn x1-add-file" title="Загрузить файл">Файл ↑</button>
     </div>`, true)
+    this.fileInput = document.body._ins('afterend', `<input type="file" id="x1-file-input" style="display: none">`, true)
     markPan._$$('.x1-bb-code').forEach(bb => {
       bb.addEventListener('click', ev => {
         ev.preventDefault()
@@ -988,6 +1001,13 @@ const formAugmentation = {
         start: `"`,
         end: `":${url} `
       })
+    })
+    markPan._$('.x1-add-file').addEventListener('click', ev => {
+      ev.preventDefault()
+      this.fileInput.click()
+    })
+    this.fileInput.addEventListener('change', ev => {
+      this.processFiles([...ev.target.files])
     })
 
     let ttsBtn = markPan._$('.x1-select-voice')
@@ -1103,19 +1123,86 @@ const formAugmentation = {
     }
     return [null,null]
   },
-  setupImgLinkPasting: function() {
+  handlePasting: function() {
     this.area.addEventListener('paste', async (ev) => {
-      let txt = ev?.clipboardData?.getData('text')
-      , [service, code] = await this.parseLink(txt)
-      if (code) {
-        let codeWrapped = this.addImageSnippet({
-          service: service,
-          code: code,
-        })
-        window.requestAnimationFrame(() => {
-          this.area.value = this.area.value.replace(txt, codeWrapped)
-        })
+      // Handle files
+      let fileItems = [...(ev?.clipboardData?.items || [])].filter(item => item?.kind == 'file')
+      if (fileItems.length) {
+        this.processFiles(fileItems)
       }
+      // Handle image links
+      else {
+        let txt = ev?.clipboardData?.getData('text')
+        if (txt)
+          this.processPastedText(txt, true)
+      }
+    })
+  },
+  handleDropping: function() {
+    this.area.addEventListener('drop', ev => {
+      if (ev.dataTransfer?.files?.length) {
+        ev.preventDefault()
+        this.processFiles([...ev.dataTransfer.files])
+      }
+    })
+  },
+  uploadFile: function(file) {return new Promise( async (resolve, reject) => {
+    let fd = new FormData()
+    fd.append('reqtype', 'fileupload')
+    fd.append('userhash', '')
+    fd.append('fileToUpload', file)
+
+    GM.xmlHttpRequest({
+      method: "POST",
+      url: UPLOAD_API,
+      headers: {
+        "accept": "application/json",
+        "cache-control": "no-cache",
+        "sec-fetch-dest": "empty",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-site": "same-origin",
+        "x-requested-with": "XMLHttpRequest",
+        "accept": "application/json"
+      },
+      "credentials": "include",
+      onload: function(res) {
+        resolve(res)
+      },
+      onerror: function(e) {
+        reject(e)
+      },
+      data: fd,
+      fetch: true // https://stackoverflow.com/a/77206951/1561204
+    })
+  })},
+  processFiles: async function(fileItems) {
+    let uploadMsg = this.area._ins('afterend', `<div class="x1-message">Загружаем файлы...</div>`, true)
+    await Promise.all(fileItems.map(async (file) => new Promise(async (resolve) => {
+      if (! (file instanceof File))
+        file = file.getAsFile()
+      try {
+        let txt = (await this.uploadFile(file))?.responseText
+        if (txt)
+          this.processPastedText(txt, false)
+      }
+      catch(e) {
+        console.error('File upload error: ', e)
+      }
+      resolve()
+    })))
+    uploadMsg.remove()
+  },
+  processPastedText: async function(txt, replace) {
+    let [service, code] = await this.parseLink(txt)
+    if (!code) return;
+    let codeWrapped = this.addImageSnippet({
+      service: service,
+      code: code,
+    })
+    window.requestAnimationFrame(() => {
+      this.area.value = replace
+        ? this.area.value.replace(txt, codeWrapped)
+        : this.area.value + codeWrapped
     })
   },
   forceRevealPane: id => $(`.x1-btn:not(.x1-xp-switcher-selected)[data-pane=${id}]`)?.click(),
@@ -1808,6 +1895,8 @@ const quickScroll = {
       this.e.classList.remove('x1-qs-up')
   }
 }
+
+
 
 
 // ============================================= Main =============================================
