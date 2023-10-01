@@ -22,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.7.0
+// @version      1.7.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -2197,7 +2197,6 @@ var hiddenItems = {
         var exp = _step3.value;
         if ((exp.test(txt) || header && exp.test(header)) && !isUnhidden) {
           post.classList.add('x1-post-hidden', 'x1-hidden-by-text');
-          console.log(post);
           if (!post._$('.x1-hiddenpost-charcount')) {
             var _header = post._$('.b-comment_b-info') || post._$('.b-blog-entry_b-header');
             if (_header) _header._ins('beforeend', "<i class=\"x1-hiddenpost-charcount\">(".concat(txt.length, " \u0437\u043D.)</i>"));
