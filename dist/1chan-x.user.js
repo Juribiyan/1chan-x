@@ -22,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.7.1
+// @version      1.8.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -2454,6 +2454,17 @@ var quickScroll = {
     if (window.scrollY != 0) this.e.classList.add('x1-qs-up');else this.e.classList.remove('x1-qs-up');
   }
 };
+function addLiveLinkIcons() {
+  $$('.b-live-entry a:first-child').forEach(function (a) {
+    var _url$search$split;
+    var url = new URL(a.href);
+    var link = url === null || url === void 0 ? void 0 : (_url$search$split = url.search.split(/^\?to=/)) === null || _url$search$split === void 0 ? void 0 : _url$search$split[1];
+    if (!link) return;
+    var extURL = new URL(link);
+    var host = extURL.hostname;
+    a._ins('beforebegin', "<img class=\"x1-livelink-icon\" src=\"https://proxy.duckduckgo.com/ip3/".concat(host, ".ico\">"));
+  });
+}
 
 // ============================================= Main =============================================
 function initAll() {
@@ -2489,13 +2500,14 @@ function _initAll() {
 
           // Add quick scroll-up
           quickScroll.init();
+          addLiveLinkIcons();
 
           // Easter egg
           val = $('a[href*="validator.w3.org"]');
           if (val) {
             val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
           }
-        case 15:
+        case 16:
         case "end":
           return _context28.stop();
       }

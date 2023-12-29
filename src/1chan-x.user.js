@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.7.1
+// @version      1.8.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1895,7 +1895,16 @@ const quickScroll = {
   }
 }
 
-
+function addLiveLinkIcons() {
+  $$('.b-live-entry a:first-child').forEach(a => {
+    const url = new URL(a.href)
+    const link = url?.search.split(/^\?to=/)?.[1]
+    if (! link) return;
+    const extURL = new URL(link)
+    const host = extURL.hostname
+    a._ins('beforebegin', `<img class="x1-livelink-icon" src="https://proxy.duckduckgo.com/ip3/${host}.ico">`)
+  })
+}
 
 
 // ============================================= Main =============================================
@@ -1923,6 +1932,8 @@ async function initAll() {
 
   // Add quick scroll-up
   quickScroll.init()
+
+  addLiveLinkIcons()
 
   // Easter egg
   let val = $('a[href*="validator.w3.org"]')
