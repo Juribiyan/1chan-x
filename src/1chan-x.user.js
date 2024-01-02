@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.8.0
+// @version      1.9.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1906,6 +1906,35 @@ function addLiveLinkIcons() {
   })
 }
 
+function setupShortFieldPadding() {
+  const form = $('#blog_form')
+  if (! form) return;
+
+  const minLength = { title: 3, text: 15 }
+
+  const btn = form._$('.b-blog-form_b-actions')._ins('beforeend', `<input type="submit" id="x1-fill-short-fields" value="Заполнить пустые поля">`, true)
+
+  ;[form.title, form.text].forEach(input => {
+    input.addEventListener('input', () => {
+      btn.style.visibility = (form.title.value.length < minLength.title || form.text.value.length < minLength.text)
+        ? 'visible'
+        : 'hidden'
+    })
+  })
+
+  function padField(field, minLength, filler = String.fromCharCode(173) /* shy */) {
+    let diff = minLength - field.value.length
+    if (diff <= 0) return;
+    field.value += filler.repeat(diff)
+  }
+
+  btn.addEventListener('click', function(ev) {
+    ev.preventDefault()
+    padField(form.title, minLength.title)
+    padField(form.text,  minLength.text)
+    btn.style.visibility = 'hidden'
+  })
+}
 
 // ============================================= Main =============================================
 
@@ -1934,6 +1963,8 @@ async function initAll() {
   quickScroll.init()
 
   addLiveLinkIcons()
+
+  setupShortFieldPadding()
 
   // Easter egg
   let val = $('a[href*="validator.w3.org"]')

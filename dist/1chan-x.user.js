@@ -22,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.8.0
+// @version      1.9.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -2465,6 +2465,32 @@ function addLiveLinkIcons() {
     a._ins('beforebegin', "<img class=\"x1-livelink-icon\" src=\"https://proxy.duckduckgo.com/ip3/".concat(host, ".ico\">"));
   });
 }
+function setupShortFieldPadding() {
+  var form = $('#blog_form');
+  if (!form) return;
+  var minLength = {
+    title: 3,
+    text: 15
+  };
+  var btn = form._$('.b-blog-form_b-actions')._ins('beforeend', "<input type=\"submit\" id=\"x1-fill-short-fields\" value=\"\u0417\u0430\u043F\u043E\u043B\u043D\u0438\u0442\u044C \u043F\u0443\u0441\u0442\u044B\u0435 \u043F\u043E\u043B\u044F\">", true);
+  [form.title, form.text].forEach(function (input) {
+    input.addEventListener('input', function () {
+      btn.style.visibility = form.title.value.length < minLength.title || form.text.value.length < minLength.text ? 'visible' : 'hidden';
+    });
+  });
+  function padField(field, minLength) {
+    var filler = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : String.fromCharCode(173);
+    var diff = minLength - field.value.length;
+    if (diff <= 0) return;
+    field.value += filler.repeat(diff);
+  }
+  btn.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    padField(form.title, minLength.title);
+    padField(form.text, minLength.text);
+    btn.style.visibility = 'hidden';
+  });
+}
 
 // ============================================= Main =============================================
 function initAll() {
@@ -2501,13 +2527,14 @@ function _initAll() {
           // Add quick scroll-up
           quickScroll.init();
           addLiveLinkIcons();
+          setupShortFieldPadding();
 
           // Easter egg
           val = $('a[href*="validator.w3.org"]');
           if (val) {
             val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
           }
-        case 16:
+        case 17:
         case "end":
           return _context28.stop();
       }
