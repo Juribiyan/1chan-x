@@ -1094,7 +1094,7 @@ const formAugmentation = {
       getImg: code => `https://files.catbox.moe/${code}`
     },
     generic: {
-      exp: /^(https\:\/\/.+?\/[^\s\/]+\.(?:jpe?g|png|gif|webp)(?:\?\S+)?)$/i,
+      exp: /^(https?\:\/\/.+?\/[^\s\/]+\.(?:jpe?g|png|gif|webp)(?:\?\S+)?)$/i,
       getImg: code => code,
       key: false
     }
