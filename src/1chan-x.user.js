@@ -11,6 +11,7 @@
 // @match        https://1chan.life/*
 // @match        https://1chan.top/*
 // @match        https://1chan.plus/*
+// @match        https://1chan.lol/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
