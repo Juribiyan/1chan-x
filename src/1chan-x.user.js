@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.9.0
+// @version      1.9.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -208,11 +208,15 @@ async function GM_getJSON(key) {
 
 const siteSpecific = {
   init: function() {
+    this.generalize()
     let host = '_' + document.location.hostname.replace(/\./g, '_').toLowerCase()
     this.current = this.sites?.[host]
     if (this.current.css) {
       injector.inject('x1'+host, this.current.css)
     }
+  },
+  generalize: function() {
+    this.sites._1chan_lol = this.sites._1chan_su,
   },
   sites: {
     _1chan_su: {
@@ -241,7 +245,7 @@ const siteSpecific = {
       }
     },
     _1chan_life: {
-      imgSvc: {supported: ['imgur', 'catbox']},
+      imgSvc: {supported: ['imgur', 'catbox', 'generic']},
       css: `
         .b-blog-panel_b-all span::before {
           content: '';
