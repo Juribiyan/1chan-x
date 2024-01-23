@@ -217,7 +217,7 @@ const siteSpecific = {
     }
   },
   generalize: function() {
-    this.sites._1chan_lol = this.sites._1chan_su,
+    this.sites._1chan_lol = this.sites._1chan_su
   },
   sites: {
     _1chan_su: {

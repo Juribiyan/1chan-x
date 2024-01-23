@@ -22,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.9.0
+// @version      1.9.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -32,6 +32,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // @match        https://1chan.life/*
 // @match        https://1chan.top/*
 // @match        https://1chan.plus/*
+// @match        https://1chan.lol/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -246,11 +247,15 @@ function _GM_getJSON() {
 var siteSpecific = {
   init: function init() {
     var _this$sites;
+    this.generalize();
     var host = '_' + document.location.hostname.replace(/\./g, '_').toLowerCase();
     this.current = (_this$sites = this.sites) === null || _this$sites === void 0 ? void 0 : _this$sites[host];
     if (this.current.css) {
       injector.inject('x1' + host, this.current.css);
     }
+  },
+  generalize: function generalize() {
+    this.sites._1chan_lol = this.sites._1chan_su;
   },
   sites: {
     _1chan_su: {
@@ -280,7 +285,7 @@ var siteSpecific = {
     },
     _1chan_life: {
       imgSvc: {
-        supported: ['imgur', 'catbox']
+        supported: ['imgur', 'catbox', 'generic']
       },
       css: "\n        .b-blog-panel_b-all span::before {\n          content: '';\n          height: 16px;\n          width: 16px;\n          display: inline-block;\n          vertical-align: middle;\n          margin-right: 6px;\n          background-image: url(/ico/favorites-false.png);\n        }\n      ",
       darkTheme: {
@@ -1319,7 +1324,7 @@ var formAugmentation = {
       }
     },
     generic: {
-      exp: /^(https\:\/\/.+?\/[^\s\/]+\.(?:jpe?g|png|gif|webp)(?:\?\S+)?)$/i,
+      exp: /^(https?\:\/\/.+?\/[^\s\/]+\.(?:jpe?g|png|gif|webp)(?:\?\S+)?)$/i,
       getImg: function getImg(code) {
         return code;
       },
