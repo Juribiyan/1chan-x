@@ -209,6 +209,7 @@
     }
     .l-content-wrap,
     .b-top-panel {
+        box-sizing: border-box;
         border-width: 1px 0px;
     }
     .b-top-panel {
@@ -340,6 +341,7 @@
         background: none;
         text-align: center;
         overflow-wrap: break-word;
+        box-sizing: border-box;
     }
     .b-header-block .b-header-block_b-stats p br {
         display: none;
