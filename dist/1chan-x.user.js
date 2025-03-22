@@ -22,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.10.0
+// @version      1.10.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -2314,7 +2314,7 @@ var settings = {
       }
       rp.classList.remove('x1-panel-shown');
     });
-    this.panel = $('.l-content-wrap')._ins('beforeend', "<div class=\"x1-settings b-blog-form\">\n      <h1>1chan-x <i>v.".concat(GM.info.script.version, "</i></h1>\n      <div class=\"b-blog-form_b-form\">\n        <div class=\"b-blog-form_b-form_b-field\">\n          <h2>\u0410\u0432\u0442\u043E\u0441\u043A\u0440\u044B\u0442\u0438\u0435 \u0442\u0435\u043A\u0441\u0442\u0430 <div id=\"text-hidelist-label\" class=\"x1-label x1-label-succ\">\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E</div></h2>\n          <p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442 \u0438\u043B\u0438 /\u0440\u0435\u0433\u0443\u043B\u044F\u0440\u043D\u044B\u0435 \u0432\u044B\u0440\u0430\u0436\u0435\u043D\u0438\u044F/</p>\n          <textarea rows=\"4\" id=\"x1-text-hidelist\"></textarea>\n          <center><button type=\"button\" id=\"x1-update-text-hidelist\" class=\"x1-btn\">\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C</button></center>\n        </div>\n        <div class=\"b-blog-form_b-form_b-field\">\n          <h2>\u0410\u0432\u0442\u043E\u0441\u043A\u0440\u044B\u0442\u0438\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0439 <div id=\"image-hidelist-label\" class=\"x1-label x1-label-succ\">\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E</div></h2>\n          <p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 URL \u0438\u0437\u043E\u0431\u043E\u0430\u0436\u0435\u043D\u0438\u044F</p>\n          <textarea rows=\"4\" id=\"x1-url-hidelist\"></textarea>\n          <center><button type=\"button\" id=\"x1-update-url-hidelist\" class=\"x1-btn\">\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C</button></center>\n        </div>\n      </div>\n      <center><button type=\"button\" id=\"x1-settings-close\" class=\"x1-btn\">\u0417\u0430\u043A\u0440\u044B\u0442\u044C</button></center>\n    </div>"), true);
+    this.panel = $('.l-content-wrap')._ins('beforeend', "<div class=\"x1-settings b-blog-form\" style=\"display:none\">\n      <h1>1chan-x <i>v.".concat(GM.info.script.version, "</i></h1>\n      <div class=\"b-blog-form_b-form\">\n        <div class=\"b-blog-form_b-form_b-field\">\n          <h2>\u0410\u0432\u0442\u043E\u0441\u043A\u0440\u044B\u0442\u0438\u0435 \u0442\u0435\u043A\u0441\u0442\u0430 <div id=\"text-hidelist-label\" class=\"x1-label x1-label-succ\">\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E</div></h2>\n          <p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u0442\u0435\u043A\u0441\u0442 \u0438\u043B\u0438 /\u0440\u0435\u0433\u0443\u043B\u044F\u0440\u043D\u044B\u0435 \u0432\u044B\u0440\u0430\u0436\u0435\u043D\u0438\u044F/</p>\n          <textarea rows=\"4\" id=\"x1-text-hidelist\"></textarea>\n          <center><button type=\"button\" id=\"x1-update-text-hidelist\" class=\"x1-btn\">\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C</button></center>\n        </div>\n        <div class=\"b-blog-form_b-form_b-field\">\n          <h2>\u0410\u0432\u0442\u043E\u0441\u043A\u0440\u044B\u0442\u0438\u0435 \u0438\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0439 <div id=\"image-hidelist-label\" class=\"x1-label x1-label-succ\">\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u043E</div></h2>\n          <p>\u0412\u0432\u0435\u0434\u0438\u0442\u0435 URL \u0438\u0437\u043E\u0431\u043E\u0430\u0436\u0435\u043D\u0438\u044F</p>\n          <textarea rows=\"4\" id=\"x1-url-hidelist\"></textarea>\n          <center><button type=\"button\" id=\"x1-update-url-hidelist\" class=\"x1-btn\">\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C</button></center>\n        </div>\n      </div>\n      <center><button type=\"button\" id=\"x1-settings-close\" class=\"x1-btn\">\u0417\u0430\u043A\u0440\u044B\u0442\u044C</button></center>\n    </div>"), true);
     this.panel._$('#x1-settings-close').addEventListener('click', function () {
       var _cw$classList;
       return cw === null || cw === void 0 ? void 0 : (_cw$classList = cw.classList) === null || _cw$classList === void 0 ? void 0 : _cw$classList.remove('x1-settings-enabled');
@@ -2512,7 +2512,7 @@ function addLiveLinkIcons() {
     if (!link) return;
     var extURL = new URL(link);
     var host = extURL.hostname;
-    a._ins('beforebegin', "<img class=\"x1-livelink-icon\" src=\"https://proxy.duckduckgo.com/ip3/".concat(host, ".ico\">"));
+    a._ins('beforebegin', "<img class=\"x1-livelink-icon\" src=\"https://proxy.duckduckgo.com/ip3/".concat(host, ".ico\" height=16>"));
   });
 }
 function setupShortFieldPadding() {

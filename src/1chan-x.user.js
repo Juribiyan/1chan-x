@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.10.0
+// @version      1.10.1
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -1735,7 +1735,7 @@ const settings = {
       }
       rp.classList.remove('x1-panel-shown')
     })
-    this.panel = $('.l-content-wrap')._ins('beforeend', `<div class="x1-settings b-blog-form">
+    this.panel = $('.l-content-wrap')._ins('beforeend', `<div class="x1-settings b-blog-form" style="display:none">
       <h1>1chan-x <i>v.${GM.info.script.version}</i></h1>
       <div class="b-blog-form_b-form">
         <div class="b-blog-form_b-form_b-field">
@@ -1947,7 +1947,7 @@ function addLiveLinkIcons() {
     if (! link) return;
     const extURL = new URL(link)
     const host = extURL.hostname
-    a._ins('beforebegin', `<img class="x1-livelink-icon" src="https://proxy.duckduckgo.com/ip3/${host}.ico">`)
+    a._ins('beforebegin', `<img class="x1-livelink-icon" src="https://proxy.duckduckgo.com/ip3/${host}.ico" height=16>`)
   })
 }
 

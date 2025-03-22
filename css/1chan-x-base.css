@@ -995,11 +995,8 @@
 .b-blog-entry.x1-post-hidden:not(.x1-hidden-post-preview) .b-blog-entry_b-header img {
     opacity: .6;
 }
-.x1-settings {
-    display: none;
-}
 .l-content-wrap.x1-settings-enabled .x1-settings {
-    display: block;
+    display: block!important;
 }
 .x1-settings-enabled .b-blog-entry,
 .x1-settings-enabled .b-paginator,
