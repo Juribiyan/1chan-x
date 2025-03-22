@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.9.2
+// @version      1.10.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
@@ -210,9 +210,15 @@ async function GM_getJSON(key) {
 
 const siteSpecific = {
   init: function() {
-    this.generalize()
-    let host = '_' + document.location.hostname.replace(/\./g, '_').toLowerCase()
-    this.current = this.sites?.[host]
+    const isGDS = typeof IS_BOARD !== "undefined"
+    const host = '_' + document.location.hostname.replace(/\./g, '_').toLowerCase()
+    if (isGDS) {
+      this.current = this.sites.GDS
+    }
+    else {
+      this.generalize()
+      this.current = this.sites?.[host]
+    }
     if (this.current.css) {
       injector.inject('x1'+host, this.current.css)
     }
@@ -334,6 +340,10 @@ const siteSpecific = {
         }
       },
       normalLogoSrc: '/img/logo_top.png' // Yeah I'm sure it was absolutely necessary to break the consistency
+    },
+    GDS: { // Green Duck Software's flavor of the engine
+      imgSvc: {supported: ['imgur', 'catbox']},
+      isGDS: true
     }
   }
 }
@@ -1807,13 +1817,16 @@ function fixMenuForTouch() {
 const darkTheme = {
   get isDark() {
     if (typeof this._darkNow === 'undefined') {
-      this._darkNow = !!~document.querySelector('link[href*="production"]').href.indexOf('omsk')
+      const link = document.querySelector(siteSpecific.current.isGDS ? 'link#color-theme' : 'link[href*="production"]')
+      this._darkNow = link
+        ? !!~link.href.indexOf('omsk')
+        : window.matchMedia("(prefers-color-scheme:dark)").matches
     }
     return this._darkNow
   },
   init: function() {
     let currentSetting = siteSpecific.current?.darkTheme
-    if (currentSetting) {
+    if (!siteSpecific.current.isGDS && currentSetting) {
       this.noService = currentSetting?.noService
       this.darkLogoSrc = currentSetting?.logo?.src
       this.darkLogoCSS = currentSetting?.logo?.css
@@ -1822,6 +1835,14 @@ const darkTheme = {
       this.switchTheme(!!localStorage['useDarkTheme'])
     }
     document.head.insertAdjacentHTML('beforeend', `<link rel="stylesheet" type="text/css" href="${cssBaseURL}/1chan-x-${this.isDark ? 'dark' : 'normal'}.css">`)
+    if (siteSpecific.current.isGDS) {
+      this.setupObserver()
+    }
+  },
+  onReady: function() {
+    if (siteSpecific.current.isGDS) return;
+    this.fixLogo()
+    this.addSwitcher()
   },
   addSwitcher: function() {
     $('#x1-settings-open')._ins('afterend', 
@@ -1844,18 +1865,35 @@ const darkTheme = {
       })
     }
   },
-  switchTheme: function(toDark) {
-    // Replace the production CSS
-    let prod = document.querySelector('link[href*="production"]')
-    prod.insertAdjacentHTML('afterend', `<link rel="stylesheet" type="text/css" href="/css/production${toDark ? '-omsk' : ''}.css" media="all">`)
-    prod.remove()
+  setupObserver: function() {
+    new MutationObserver(mutations => {
+      if (mutations[0].target.id == 'color-theme')
+        this.handleMutation(mutations[0].target)
+    }).observe(document.head, { attributes: true, subtree: true })
+  },
+  handleMutation: function(link) {
+    if (this.mutationDebounce)
+      clearTimeout(this.mutationDebounce)
+    this.mutationDebounce = setTimeout(() => {
+      delete this._darkNow
+      this.switchTheme(this.isDark, true)
+      this.mutationDebounce = false
+    }, 100)
+  },
+  switchTheme: function(toDark, onlyExtension=false) {
+    if (! onlyExtension) {
+      // Replace the production CSS
+      let prod = document.querySelector('link[href*="production"]')
+      prod.insertAdjacentHTML('afterend', `<link rel="stylesheet" type="text/css" href="/css/production${toDark ? '-omsk' : ''}.css" media="all">`)
+      prod.remove()
+      this._darkNow = toDark
+    }
     // Replace the extension CSS
     let user = document.querySelector(`link[href*="1chan-x-${toDark ? 'normal' : 'dark'}"]`)
     if (user) {
       user.insertAdjacentHTML('afterend', `<link rel="stylesheet" type="text/css" href="${cssBaseURL}/1chan-x-${toDark ? 'dark' : 'normal'}.css">`)
       user.remove()
     }
-    this._darkNow = toDark
   },
   fixLogo: function(isDark=this.isDark) {
     // Replace the logo
@@ -1962,9 +2000,7 @@ async function initAll() {
 
   fixMenuForTouch()
 
-  darkTheme.fixLogo()
-  // Add theme switcher
-  darkTheme.addSwitcher()
+  darkTheme.onReady()
 
   // Add quick scroll-up
   quickScroll.init()

@@ -22,7 +22,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.9.2
+// @version      1.10.0
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/dist/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/dist/1chan-x.user.js
@@ -247,10 +247,15 @@ function _GM_getJSON() {
 }
 var siteSpecific = {
   init: function init() {
-    var _this$sites;
-    this.generalize();
+    var isGDS = typeof IS_BOARD !== "undefined";
     var host = '_' + document.location.hostname.replace(/\./g, '_').toLowerCase();
-    this.current = (_this$sites = this.sites) === null || _this$sites === void 0 ? void 0 : _this$sites[host];
+    if (isGDS) {
+      this.current = this.sites.GDS;
+    } else {
+      var _this$sites;
+      this.generalize();
+      this.current = (_this$sites = this.sites) === null || _this$sites === void 0 ? void 0 : _this$sites[host];
+    }
     if (this.current.css) {
       injector.inject('x1' + host, this.current.css);
     }
@@ -340,6 +345,14 @@ var siteSpecific = {
         }
       },
       normalLogoSrc: '/img/logo_top.png' // Yeah I'm sure it was absolutely necessary to break the consistency
+    },
+
+    GDS: {
+      // Green Duck Software's flavor of the engine
+      imgSvc: {
+        supported: ['imgur', 'catbox']
+      },
+      isGDS: true
     }
   }
 };
@@ -2367,14 +2380,15 @@ function fixMenuForTouch() {
 var darkTheme = {
   get isDark() {
     if (typeof this._darkNow === 'undefined') {
-      this._darkNow = !!~document.querySelector('link[href*="production"]').href.indexOf('omsk');
+      var link = document.querySelector(siteSpecific.current.isGDS ? 'link#color-theme' : 'link[href*="production"]');
+      this._darkNow = link ? !!~link.href.indexOf('omsk') : window.matchMedia("(prefers-color-scheme:dark)").matches;
     }
     return this._darkNow;
   },
   init: function init() {
     var _siteSpecific$current4;
     var currentSetting = (_siteSpecific$current4 = siteSpecific.current) === null || _siteSpecific$current4 === void 0 ? void 0 : _siteSpecific$current4.darkTheme;
-    if (currentSetting) {
+    if (!siteSpecific.current.isGDS && currentSetting) {
       var _currentSetting$logo, _currentSetting$logo2;
       this.noService = currentSetting === null || currentSetting === void 0 ? void 0 : currentSetting.noService;
       this.darkLogoSrc = currentSetting === null || currentSetting === void 0 ? void 0 : (_currentSetting$logo = currentSetting.logo) === null || _currentSetting$logo === void 0 ? void 0 : _currentSetting$logo.src;
@@ -2384,6 +2398,14 @@ var darkTheme = {
       this.switchTheme(!!localStorage['useDarkTheme']);
     }
     document.head.insertAdjacentHTML('beforeend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-").concat(this.isDark ? 'dark' : 'normal', ".css\">"));
+    if (siteSpecific.current.isGDS) {
+      this.setupObserver();
+    }
+  },
+  onReady: function onReady() {
+    if (siteSpecific.current.isGDS) return;
+    this.fixLogo();
+    this.addSwitcher();
   },
   addSwitcher: function addSwitcher() {
     var _this27 = this;
@@ -2406,18 +2428,39 @@ var darkTheme = {
       });
     }
   },
+  setupObserver: function setupObserver() {
+    var _this28 = this;
+    new MutationObserver(function (mutations) {
+      if (mutations[0].target.id == 'color-theme') _this28.handleMutation(mutations[0].target);
+    }).observe(document.head, {
+      attributes: true,
+      subtree: true
+    });
+  },
+  handleMutation: function handleMutation(link) {
+    var _this29 = this;
+    if (this.mutationDebounce) clearTimeout(this.mutationDebounce);
+    this.mutationDebounce = setTimeout(function () {
+      delete _this29._darkNow;
+      _this29.switchTheme(_this29.isDark, true);
+      _this29.mutationDebounce = false;
+    }, 100);
+  },
   switchTheme: function switchTheme(toDark) {
-    // Replace the production CSS
-    var prod = document.querySelector('link[href*="production"]');
-    prod.insertAdjacentHTML('afterend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/production".concat(toDark ? '-omsk' : '', ".css\" media=\"all\">"));
-    prod.remove();
+    var onlyExtension = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+    if (!onlyExtension) {
+      // Replace the production CSS
+      var prod = document.querySelector('link[href*="production"]');
+      prod.insertAdjacentHTML('afterend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"/css/production".concat(toDark ? '-omsk' : '', ".css\" media=\"all\">"));
+      prod.remove();
+      this._darkNow = toDark;
+    }
     // Replace the extension CSS
     var user = document.querySelector("link[href*=\"1chan-x-".concat(toDark ? 'normal' : 'dark', "\"]"));
     if (user) {
       user.insertAdjacentHTML('afterend', "<link rel=\"stylesheet\" type=\"text/css\" href=\"".concat(cssBaseURL, "/1chan-x-").concat(toDark ? 'dark' : 'normal', ".css\">"));
       user.remove();
     }
-    this._darkNow = toDark;
   },
   fixLogo: function fixLogo() {
     var _siteSpecific$current5;
@@ -2432,13 +2475,13 @@ var darkTheme = {
 };
 var quickScroll = {
   init: function init() {
-    var _this28 = this;
+    var _this30 = this;
     this.e = document.body._ins('afterbegin', "<div id=\"x1-quick-scroll\"><div>\u2193</div></div>", true);
     this.e.addEventListener('click', function () {
-      return _this28.scroll();
+      return _this30.scroll();
     });
     window.addEventListener('scroll', function () {
-      return _this28.update();
+      return _this30.update();
     });
     this.update();
   },
@@ -2527,9 +2570,7 @@ function _initAll() {
         case 8:
           setupPanels();
           fixMenuForTouch();
-          darkTheme.fixLogo();
-          // Add theme switcher
-          darkTheme.addSwitcher();
+          darkTheme.onReady();
 
           // Add quick scroll-up
           quickScroll.init();
@@ -2541,7 +2582,7 @@ function _initAll() {
           if (val) {
             val._ins('beforeend', "<img class=\"smiley\" src=\"/img/makak.gif\">");
           }
-        case 17:
+        case 16:
         case "end":
           return _context28.stop();
       }
