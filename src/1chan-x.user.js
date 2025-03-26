@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         1chan-X
 // @namespace    https://ochan.ru/userjs/
-// @version      1.10.2
+// @version      1.10.3
 // @description  UX extension for 1chan.su and the likes
 // @updateURL    https://juribiyan.github.io/1chan-x/src/1chan-x.meta.js
 // @downloadURL  https://juribiyan.github.io/1chan-x/src/1chan-x.user.js
-// @author       Snivy
+// @author       Snivy & Vladeek
 // @match        https://1chan.su/*
 // @match        https://1chan.ca/*
 // @match        https://1chan.life/*
@@ -14,6 +14,13 @@
 // @match        https://1chan.lol/*
 // @match        http://kolchh5ok22n7kmycnghqtie574gzkiz3ojebm574isvlfbkqtjqvdyd.onion/*
 // @match        https://1chan.cyou/*
+// @exclude      https://1chan.cyou/admin/*
+// @match        http://kolchan72pmrg6a6okrfx3v3ia6gbkzluc4otfcsabkyl7u6gpwaglqd.onion/*
+// @exclude      http://kolchan72pmrg6a6okrfx3v3ia6gbkzluc4otfcsabkyl7u6gpwaglqd.onion/admin/*
+// @match        http://kolchfc6lm6ltwdj56z6wsptexlnulo3xtkjv5wr7z7frvdgi45q.b32.i2p/*
+// @exclude      http://kolchfc6lm6ltwdj56z6wsptexlnulo3xtkjv5wr7z7frvdgi45q.b32.i2p/admin/*
+// @match        http://[20f:f5e6:3d42:4fbd:d58b:2349:5bfa:203c]/*
+// @exclude      http://[20f:f5e6:3d42:4fbd:d58b:2349:5bfa:203c]/admin/*
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -344,7 +351,8 @@ const siteSpecific = {
     },
     GDS: { // Green Duck Software's flavor of the engine
       imgSvc: {supported: ['imgur', 'catbox']},
-      isGDS: true
+      isGDS: true,
+      smileysPath: '/img/smilies/'
     }
   }
 }
@@ -916,8 +924,8 @@ const formAugmentation = {
     })
   },
   known_smileys: {
-    gif: ["coolface", "desu", "nyan", "sobak", "trollface", "slon", "ssaksa", "sraksa", "sosak", "makak", "pauk", "popka", "popka2", "cheez", "weed"],
-    png: ["awesome", "ffuu", "okay", "rage", "deb", "oru", "doge", "sheez", "poo", "hero", "yajka", "joseph", "ussr", "kpss", "yes", "you", "projector"],
+    gif: ["coolface", "desu", "nyan", "sobak", "trollface", "slon", "ssaksa", "sraksa", "sosak", "makak", "pauk", "popka", "popka2", "cheez", "weed", "turtle", "cancer", "kolkun"],
+    png: ["Jlby", "JlbyHD", "JlbyPride", "awesome", "ffuu", "okay", "rage", "deb", "oru", "doge", "sheez", "poo", "hero", "yajka", "joseph", "ussr", "kpss", "no", "pizda", "yes", "you", "projector", "proj", "boyar", "pork", "aftersex", "sega", "srunka", "guba", "hazard", "monies", "mic", "jackdaniels", "mouse", "shekoder", "ssaksa", "orucat", "rooster"],
     jpg: ["cuni"]
   },
   smile_map: {"poo_target": "png"},
@@ -925,8 +933,10 @@ const formAugmentation = {
     for (let ext in this.known_smileys) {
       this.known_smileys[ext].forEach(s => {
         let code = `:${s}:`
-        , smil = $('#x1-xp-pane-smileys')._ins('beforeend', 
-          `<img class="smiley x1-snippet-img x1-insert-smiley" src="/img/${s}.${ext}" alt="${code}" title="${code}">`, true)
+        , smilePath = siteSpecific.current?.smileysPath || '/img/',
+        smileysSrc = `${smilePath}${s}.${ext}`,
+        smil = $('#x1-xp-pane-smileys')._ins('beforeend', 
+          `<img class="smiley x1-snippet-img x1-insert-smiley" src="${smileysSrc}" alt="${code}" title="${code}">`, true)
         smil.addEventListener('click', () => {
           this.insertText({end: code})
         })
@@ -1766,6 +1776,7 @@ const settings = {
 }
 
 function setupPanels() {
+  if (siteSpecific.current.isGDS) return;
   $('.b-top-panel')._ins('afterbegin', `
     <div class="x1-panel-toggle x1-panel-toggle-inmenu x1-panel-toggle-inmenu-left" data-panel="left"></div>
     <div class="x1-panel-toggle x1-panel-toggle-inmenu x1-panel-toggle-inmenu-right" data-panel="right"></div>`)
