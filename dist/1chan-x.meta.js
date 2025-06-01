@@ -15,6 +15,8 @@
 // @match        http://kolchh5ok22n7kmycnghqtie574gzkiz3ojebm574isvlfbkqtjqvdyd.onion/*
 // @match        https://1chan.cyou/*
 // @exclude      https://1chan.cyou/admin/*
+// @match        https://1chan.0chan.club/*
+// @exclude      https://1chan.0chan.club/admin/*
 // @match        http://kolchan72pmrg6a6okrfx3v3ia6gbkzluc4otfcsabkyl7u6gpwaglqd.onion/*
 // @exclude      http://kolchan72pmrg6a6okrfx3v3ia6gbkzluc4otfcsabkyl7u6gpwaglqd.onion/admin/*
 // @match        http://kolchfc6lm6ltwdj56z6wsptexlnulo3xtkjv5wr7z7frvdgi45q.b32.i2p/*
